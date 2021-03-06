@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>793</width>
+    <height>1013</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QLabel" name="CODE">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>10</y>
+      <width>31</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>CODE</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="RESULT">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>10</y>
+      <width>51</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>RESULT</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="GRAMMAR">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>450</y>
+      <width>91</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>GRAMMAR TREE</string>
+    </property>
+   </widget>
+   <widget class="QPlainTextEdit" name="CODE_text">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>30</y>
+      <width>360</width>
+      <height>400</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QTextBrowser" name="GRAMMAR_text">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>470</y>
+      <width>751</width>
+      <height>380</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="LOAD">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>860</y>
+      <width>210</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>LOAD</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="RUN">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>860</y>
+      <width>210</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>RUN</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="CLEAR">
+    <property name="geometry">
+     <rect>
+      <x>560</x>
+      <y>860</y>
+      <width>210</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>CLEAR</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="COMMAND_input">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>900</y>
+      <width>101</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>COMMAND INPUT</string>
+    </property>
+   </widget>
+   <widget class="QTextBrowser" name="RESULT_text">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>30</y>
+      <width>360</width>
+      <height>400</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="COMMAND_text">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>920</y>
+      <width>760</width>
+      <height>30</height>
+     </rect>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>793</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuGUI_Basic">
+    <property name="title">
+     <string>GUI Basic</string>
+    </property>
+   </widget>
+   <addaction name="menuGUI_Basic"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
