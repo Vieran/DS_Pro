@@ -87,7 +87,7 @@ public:
                 break;
             }
             p = p->down;
-            current_level_head = head->down;
+            current_level_head = current_level_head->down;
         }
         if (!p)
             return false;
