@@ -35,10 +35,11 @@ public:
             return nullptr;
         Node<K,V> *p = head;
         while (p) {
-            while(p->right && p->right->key < key)
+            while(p->right && p->right->key <= key) {
+                if (p->right->key == key)
+                    return &(p->right->val);
                 p = p->right;
-            if (p->right && p->right->key == key)
-                return &(p->right->val);
+            }
             p = p->down;
         }
         return nullptr;
@@ -68,7 +69,7 @@ public:
             Node<K, V> * oldHead = head;
             head = new Node<K, V>();
             head->right = new Node<K, V>(NULL, downNode, key, val);
-            //head->down = oldHead; // why? it should be the downNode?
+            head->down = oldHead; // it is different from the text book. there is no sentry.
         }
         num_of_nodes++;
     }
@@ -77,6 +78,7 @@ public:
         if (num_of_nodes == 0)
             return false;
         Node<K,V> *p = head;
+        Node<K,V> *current_level_head = head;
         while (p) { // find p
             while(p->right && p->right->key < key)
                 p = p->right;
@@ -85,14 +87,25 @@ public:
                 break;
             }
             p = p->down;
+            current_level_head = head->down;
         }
         if (!p)
             return false;
         
-        // delete
+        // delete and link
         Node<K,V> *tmp = p;
+        Node<K,V> *current_node = current_level_head;
         while (tmp) {
             tmp = p->down;
+            // link
+            if (current_level_head == head && head->right->right == NULL) // delete at the top level
+                head = head->down;
+            while (current_node->right != p)
+                current_node = current_node->right;
+            current_node->right = p->right;
+            current_level_head = current_level_head->down;
+            current_node = current_level_head;
+            // delete
             free(p);
             p = tmp;
         }
@@ -104,10 +117,18 @@ public:
 int main() {
     Skiplist<int, int> sl;
     sl.put(1, 1);
-    sl.put(2, 2);
     sl.put(4, 3);
+    sl.put(2, 2);
     cout << *(sl.get(4)) << endl;
     sl.remove(2);
+    sl.put(5, 2);
+    sl.put(0, 2);
+    sl.put(0, 1);
     cout << sl.size() << endl;
+    cout << *(sl.get(1)) << endl;
+    cout << *(sl.get(4)) << endl;
+    cout << *(sl.get(5)) << endl;
+    sl.remove(5);
+    cout << *(sl.get(0)) << endl;
     return 0;
 }
