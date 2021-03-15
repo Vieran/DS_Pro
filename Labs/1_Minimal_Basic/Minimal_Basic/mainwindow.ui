@@ -53,16 +53,6 @@
      <string>GRAMMAR TREE</string>
     </property>
    </widget>
-   <widget class="QPlainTextEdit" name="CODE_text">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>30</y>
-      <width>360</width>
-      <height>400</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QTextBrowser" name="GRAMMAR_text">
     <property name="geometry">
      <rect>
@@ -142,6 +132,16 @@
       <y>920</y>
       <width>760</width>
       <height>30</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QTextBrowser" name="CODE_text">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>30</y>
+      <width>360</width>
+      <height>400</height>
      </rect>
     </property>
    </widget>

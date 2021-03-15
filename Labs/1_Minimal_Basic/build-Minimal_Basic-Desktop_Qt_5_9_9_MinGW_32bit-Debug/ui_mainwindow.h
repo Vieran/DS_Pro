@@ -19,7 +19,6 @@
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
-#include <QtWidgets/QPlainTextEdit>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTextBrowser>
@@ -34,7 +33,6 @@ public:
     QLabel *CODE;
     QLabel *RESULT;
     QLabel *GRAMMAR;
-    QPlainTextEdit *CODE_text;
     QTextBrowser *GRAMMAR_text;
     QPushButton *LOAD;
     QPushButton *RUN;
@@ -42,6 +40,7 @@ public:
     QLabel *COMMAND_input;
     QTextBrowser *RESULT_text;
     QLineEdit *COMMAND_text;
+    QTextBrowser *CODE_text;
     QMenuBar *menubar;
     QMenu *menuGUI_Basic;
     QStatusBar *statusbar;
@@ -62,9 +61,6 @@ public:
         GRAMMAR = new QLabel(centralwidget);
         GRAMMAR->setObjectName(QStringLiteral("GRAMMAR"));
         GRAMMAR->setGeometry(QRect(20, 450, 91, 16));
-        CODE_text = new QPlainTextEdit(centralwidget);
-        CODE_text->setObjectName(QStringLiteral("CODE_text"));
-        CODE_text->setGeometry(QRect(20, 30, 360, 400));
         GRAMMAR_text = new QTextBrowser(centralwidget);
         GRAMMAR_text->setObjectName(QStringLiteral("GRAMMAR_text"));
         GRAMMAR_text->setGeometry(QRect(20, 470, 751, 380));
@@ -86,6 +82,9 @@ public:
         COMMAND_text = new QLineEdit(centralwidget);
         COMMAND_text->setObjectName(QStringLiteral("COMMAND_text"));
         COMMAND_text->setGeometry(QRect(20, 920, 760, 30));
+        CODE_text = new QTextBrowser(centralwidget);
+        CODE_text->setObjectName(QStringLiteral("CODE_text"));
+        CODE_text->setGeometry(QRect(20, 30, 360, 400));
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QStringLiteral("menubar"));

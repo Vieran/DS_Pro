@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QMap>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -22,9 +23,13 @@ private slots:
 
     void on_CLEAR_clicked();
 
-    void on_lineEdit_returnPressed();
+    void on_COMMAND_text_returnPressed();
 
 private:
     Ui::MainWindow *ui;
+    QMap<int, QString> basic_program;
+
+    void show_code();
+    void show_help();
 };
 #endif // MAINWINDOW_H
