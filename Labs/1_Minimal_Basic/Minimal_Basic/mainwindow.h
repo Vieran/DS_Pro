@@ -28,8 +28,10 @@ private slots:
 private:
     Ui::MainWindow *ui;
     QMap<int, QString> basic_program;
+    QMap<QString, QString> data;
 
     void show_code();
     void show_help();
+    void constructExp(QString in_str);
 };
 #endif // MAINWINDOW_H

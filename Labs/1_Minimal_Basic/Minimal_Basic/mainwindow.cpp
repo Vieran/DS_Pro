@@ -16,6 +16,42 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::constructExp(QString in_str) {
+    QString reg_pattern = "(\\d+)\\s+(REM|LET|PRINT|INPUT|GOTO|IF|END).*";
+    QRegExp exp(reg_pattern);
+    exp.indexIn(in_str);
+    QString operation = exp.cap(2);
+    qDebug() << exp.cap(2);
+    if (operation == "LET") {
+        QRegExp let_pattern("\\d+\\s+LET\\s+(\\w+)\\s*=\\s*(.*)");
+        let_pattern.indexIn(in_str);
+        QString var = let_pattern.cap(1);
+        QString exp = let_pattern.cap(2);
+        data.insert(var, exp);
+    } else if (operation == "PRINT") {
+        QRegExp print_pattern("\\d+\\s+PRINT\\s+(\\w+)");
+        print_pattern.indexIn(in_str);
+        QString var = print_pattern.cap(1);
+//        QString get_val(data.value(var));
+        ui->RESULT_text->append(data.value(var));
+    } else if (operation == "INPUT") {
+        QRegExp input_pattern("\\d+\\s+INPUT\\s+(\\w+)");
+        input_pattern.indexIn(in_str);
+        QString var = input_pattern.cap(1);
+    } else if (operation == "GOTO") {
+        QRegExp goto_pattern("\\d+\\s+GOTO\\s+(\\d+)");
+        goto_pattern.indexIn(in_str);
+        int line_number = goto_pattern.cap(1).toInt();
+    } else if (operation == "IF") {
+        QRegExp if_pattern("\\d+\\s+IF\\s+(.*)?THEN\\s+(\\d+)");
+        if_pattern.indexIn(in_str);
+        QString if_exp = if_pattern.cap(1);
+        int line_number = if_pattern.cap(2).toInt();
+    } else if (operation == "END") {
+
+    }
+}
+
 
 // show the code in the code_text box
 void MainWindow::show_code() {
@@ -84,6 +120,7 @@ void MainWindow::on_COMMAND_text_returnPressed()
 {
    // press enter in command input box
     QString command = ui->COMMAND_text->text();
+    constructExp(command);
     if (command == "QUIT") {
         exit(0);
     } else if (command == "HELP") {
