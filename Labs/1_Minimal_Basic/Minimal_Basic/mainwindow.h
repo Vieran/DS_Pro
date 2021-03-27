@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 #include <QMap>
+#include "exp.h"
+#include "statement.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -27,11 +29,8 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    QMap<int, QString> basic_program;
-    QMap<QString, QString> data;
-
     void show_code();
     void show_help();
-    void constructExp(QString in_str);
+
 };
 #endif // MAINWINDOW_H
