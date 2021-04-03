@@ -101,3 +101,8 @@ int EvaluationContext::getValue(QString var) {
 bool EvaluationContext::isDefined(QString var) {
     return symbolTable.contains(var);
 }
+
+// delete all the elements
+void EvaluationContext::clear() {
+    symbolTable.clear();
+}

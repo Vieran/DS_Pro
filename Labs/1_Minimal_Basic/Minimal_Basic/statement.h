@@ -7,15 +7,15 @@
 #define STATEMENT_H
 
 #include <QString>
+#include "exp.h"
 
-enum STA{REM, LET, PRINT, INPUT, GOTO, IF, END};
+enum STA{REM, LET, PRINT, INPUT, GOTO, IF_THEN, END};
 enum OP{equal, greater, less, add, sub, multi, divide, left_parenthesis, right_parenthesis}; // =><+-*/()
 
 class Statement {
 private:
-    QString origin;
     STA sta;
-    QString *exp_tree;
+    Expression *exp;
 
     void rem_handler();
     void let_handler();
@@ -25,7 +25,9 @@ private:
     void ifthen_handler();
     void end_handler();
 public:
+    QString origin;
     Statement(QString in_str);
+    ~Statement();
 };
 
 #endif //STATEMENT_H

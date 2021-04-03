@@ -6,57 +6,66 @@
 #include <QtDebug>
 
 void Statement::rem_handler() {
-    // handle rem
+    sta = REM;
+    QRegExp rem_pattern("\\s*\\d+\\s+REM\\s+(.*)");
+    rem_pattern.indexIn(origin);
+    exp = NULL;
 }
 
 void Statement::let_handler() {
     sta = LET;
-    QRegExp let_pattern("\\d+\\s+LET\\s+(\\w+)\\s*=\\s*(.*)");
+    QRegExp let_pattern("\\s*\\d+\\s+LET\\s+(\\w+)\\s*=\\s*(.*)");
     let_pattern.indexIn(origin);
-    QString var = let_pattern.cap(1);
-    QString exp = let_pattern.cap(2);
-//    data.insert(var, exp);
+    Expression *var = new IdentifierExp(let_pattern.cap(1));
+    //exp = new CompoundExp("=", var);
 }
 
 void Statement::print_handler() {
     sta = PRINT;
-    QRegExp print_pattern("\\d+\\s+PRINT\\s+(\\w+)");
+    QRegExp print_pattern("\\s*\\d+\\s+PRINT\\s+(\\w+)");
     print_pattern.indexIn(origin);
-    QString var = print_pattern.cap(1);
-//    QString get_val(data.value(var));
-//   ui->RESULT_text->append(data.value(var));
+    exp = NULL;
+    // print the value
 }
 
 void Statement::input_handler() {
     sta = INPUT;
-    QRegExp input_pattern("\\d+\\s+INPUT\\s+(\\w+)");
+    QRegExp input_pattern("\\s*\\d+\\s+INPUT\\s+(\\w+)");
     input_pattern.indexIn(origin);
     QString var = input_pattern.cap(1);
+    // get input from the command line
+    get_value = 1; // set flag to get value
+//    to_get_input(exp);
+    while(get_value){} // wait for the input
+    //pro_data.setValue(exp, input_value.toInt());
 }
 
 void Statement::goto_handler() {
-    QRegExp goto_pattern("\\d+\\s+GOTO\\s+(\\d+)");
+    sta = GOTO;
+    QRegExp goto_pattern("\\s*\\d+\\s+GOTO\\s+(\\d+)");
     goto_pattern.indexIn(origin);
-    int line_number = goto_pattern.cap(1).toInt();
+    exp = new ConstantExp(goto_pattern.cap(1).toInt());
 }
 
 void Statement::ifthen_handler() {
-    QRegExp if_pattern("\\d+\\s+IF\\s+(.*)?THEN\\s+(\\d+)");
+    sta = IF_THEN;
+    QRegExp if_pattern("\\s*\\d+\\s+IF\\s+(.*)?THEN\\s+(\\d+)");
     if_pattern.indexIn(origin);
-    QString if_exp = if_pattern.cap(1);
-    int line_number = if_pattern.cap(2).toInt();
+    //exp = if_pattern.cap(1);
+//    int line_number = if_pattern.cap(2).toInt();
 }
 
 void Statement::end_handler() {
-    // handle end
+    sta = END;
+    exp = NULL;
 }
 
 Statement::Statement(QString in_str) {
     origin = in_str;
-    QRegExp reg_exp("(\\d+)\\s+(REM|LET|PRINT|INPUT|GOTO|IF|END).*");
+    qDebug() << origin;
+    QRegExp reg_exp("\\s*(\\d+)\\s+(REM|LET|PRINT|INPUT|GOTO|IF|END).*");
     reg_exp.indexIn(in_str);
     QString statement = reg_exp.cap(2);
-//        qDebug() << exp.cap(2);
     if (statement == "REM")
         rem_handler();
     else if (statement == "LET")
@@ -73,4 +82,9 @@ Statement::Statement(QString in_str) {
         end_handler();
     else // error occurs
         error("error in statement construct");
+}
+
+Statement::~Statement() {
+    if (exp != NULL)
+        delete exp;
 }

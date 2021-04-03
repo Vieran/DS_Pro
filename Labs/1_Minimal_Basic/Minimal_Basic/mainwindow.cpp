@@ -20,14 +20,15 @@ MainWindow::~MainWindow()
 // show the code in the code_text box
 void MainWindow::show_code() {
     ui->CODE_text->clear(); // clear the text first
-    QMap<int, QString>::const_iterator tmp;
+    QMap<int, Statement>::const_iterator tmp;
     tmp = basic_program.constBegin();
     while (tmp != basic_program.constEnd()) {
-        ui->CODE_text->append(tmp.value());
+        ui->CODE_text->append(tmp.value().origin);
         ++tmp;
     }
 }
 
+// show help message
 void MainWindow::show_help() {
     QMessageBox::information(this,
                              "HELP",
@@ -37,25 +38,34 @@ void MainWindow::show_help() {
                              QMessageBox::Yes);
 }
 
+// store the input command into basic_program
+void MainWindow::command_handler(QString in_str) {
+    QRegExp reg_exp("\\s*(\\d+)\\s*.*");
+    reg_exp.indexIn(in_str);
+    int line_number = reg_exp.cap(1).toInt();
+    if (line_number) {
+        // if the command is only a line number, then delete that line(what if there is some blank?)
+        if (in_str.length() == reg_exp.cap(1).length())
+            basic_program.remove(line_number);
+        else
+            basic_program.insert(line_number, in_str);
+    } else
+        show_help();
+}
+
 void MainWindow::on_LOAD_clicked()
 {
    // on click load button
     QString filename = QFileDialog::getOpenFileName(this, tr("select a file"), "", tr("filetype(*.txt)"));
     if(filename.isEmpty()) // if not select any file, return
         return;
-    // notice that filename is exactly the full path to the file
-    //qDebug() << filename;
-    QFile file(filename);
+    QFile file(filename); // notice that filename is exactly the full path to the file
     if(file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         //ui->CODE_text->setPlainText(file.readAll());
         while(!file.atEnd()) {
             QString command(file.readLine()); // transfer qbytearrary into qstring
             command = command.trimmed(); // delete the \n at the end of a line
-            QStringList command_list = command.split(" "); // split the statement by " "
-            // store the statement in the structure
-            int line_number = command_list[0].toInt();
-            if (line_number)
-                basic_program.insert(line_number, command);
+            command_handler(command);
         }
     }
     file.close();
@@ -64,16 +74,17 @@ void MainWindow::on_LOAD_clicked()
 
 void MainWindow::on_RUN_clicked()
 {
-   // on click run button
+    // on click run button
+    // parsing
     // show the grammar tree
-    qDebug() << basic_program.keys();
-    qDebug() << basic_program.values();
+    // evaluating
 }
 
 void MainWindow::on_CLEAR_clicked()
 {
    // on click clear button
     basic_program.clear();
+    pro_data.clear();
     ui->CODE_text->clear();
     ui->RESULT_text->clear();
     ui->GRAMMAR_text->clear();
@@ -84,7 +95,10 @@ void MainWindow::on_COMMAND_text_returnPressed()
 {
    // press enter in command input box
     QString command = ui->COMMAND_text->text();
-    if (command == "QUIT") {
+    if (get_value) { // get the input
+        input_value = command;
+        get_value = false;
+    } else if (command == "QUIT") {
         exit(0);
     } else if (command == "HELP") {
         show_help();
@@ -94,22 +108,8 @@ void MainWindow::on_COMMAND_text_returnPressed()
         on_RUN_clicked();
     } else if (command == "CLEAR") {
         on_CLEAR_clicked();
-    } else {// input is regarded as statement
-        // split the statement according to " "
-        QStringList command_list = command.split(" ");
-        qDebug() << command_list;
-        int line_number = command_list[0].toInt();
-        // suppose that the line number is positive
-        if (line_number) {
-            // if the command is only a line number, then delete that line
-            if (command_list.length() == 1)
-                basic_program.remove(line_number);
-            else {
-                basic_program.insert(line_number, command); // store it by using line number as key
-                ui->CODE_text->append(command);
-            }
-        } else
-            show_help();
+    } else {// input is regarded as statement command
+        command_handler(command);
     }
     ui->COMMAND_text->clear();
     show_code();

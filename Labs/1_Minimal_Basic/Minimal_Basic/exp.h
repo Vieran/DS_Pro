@@ -94,10 +94,10 @@ public:
     void setValue(QString var, int value);
     int getValue(QString var);
     bool isDefined(QString var);
+    void clear();
 
 private:
     QMap<QString, int> symbolTable;
 };
-
 
 #endif // EXP_H
