@@ -105,6 +105,8 @@ void delete_(TreeNode *&t) {
 
 // given a listnode list, return the treenode list
 TreeNode *sortedListToBST(ListNode *head) {
+	if (head == nullptr)
+		return nullptr;
     // create a TreeNode tree and insert the listnode into it
     TreeNode *treehead = new TreeNode(head->val, nullptr, nullptr);
     ListNode *tmp = head->next;
