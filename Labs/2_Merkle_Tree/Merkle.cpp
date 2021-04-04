@@ -1,5 +1,5 @@
 #include <vector>
-//#include <iostream>
+#include <iostream>
 
 #pragma once
 unsigned long hash64shift(unsigned long key) {
@@ -24,7 +24,7 @@ struct node_t {
     node_t *parent;
     unsigned long hash_val;  // the hash value of this node
     unsigned long position;  // the position of the node in this list
-    node_t(node_t *prev, unsigned hv, unsigned long pos):prev(prev), next(nullptr), parent(nullptr), hash_val(hv), position(pos) {}
+    node_t(node_t *prev, unsigned long hv, unsigned long pos):prev(prev), next(nullptr), parent(nullptr), hash_val(hv), position(pos) {}
 };
 struct level_list {
     level_list *up_level;
@@ -43,6 +43,10 @@ private:
     void insert(level_list *&ls, unsigned long hash_val);
     // find the hash value in the leaf nodes
     node_t* find_node(unsigned long hash_value);
+    // insert in even position
+    void even_p();
+    // insert in odd position
+    void odd_p();
 
 public:
     Merkle_Tree();
@@ -65,10 +69,23 @@ Merkle_Tree::Merkle_Tree(std::vector<unsigned long> leaf_nodes) {
     node_list = new level_list;
     for (std::vector<unsigned long>::iterator tmp = leaf_nodes.begin(); tmp != last; tmp++)
         insert(node_list, *tmp);
-    node_list->up_level = nullptr;
 }
 
-Merkle_Tree::~Merkle_Tree() {}
+Merkle_Tree::~Merkle_Tree() {
+    level_list *tmp = node_list;
+    while (tmp) {
+        node_t *node = tmp->first_node;
+        while (node) {
+            node = node_list->first_node;
+            node_list->first_node = node->next;
+            delete node;
+            node = node_list->first_node;
+        }
+        node_list = node_list->up_level;
+        delete tmp;
+        tmp = node_list;
+    }
+}
 
 // re-compute the hash tree after a new leaf node insert
 void Merkle_Tree::build_tree(level_list *&ls) {
@@ -182,17 +199,16 @@ unsigned long Merkle_Tree::getRootHash() {
     return root->hash_val;
 }
 
-/*
 int main() {
     std::vector<unsigned long> leaf_node;
-    for(unsigned long i = 0; i < 10; i++)
+    for(unsigned long i = 0; i < 8; i++)
         leaf_node.push_back(i);
     Merkle_Tree mt(leaf_node);
-    mt.getRootHash();
-    std::vector<unsigned long> getp = mt.getProof(0);
-    for (std::vector<unsigned long>::iterator it = getp.begin(); it != getp.end(); it++)
-        std::cout << *it << " ";
-    std::cout << std::endl;
+    for (std::vector<unsigned long>::iterator it = leaf_node.begin(); it != leaf_node.end(); it++) {
+        std::vector<unsigned long> getp = mt.getProof(*it);
+        for (std::vector<unsigned long>::iterator it_ = getp.begin(); it_ != getp.end(); it_++)
+            std::cout << *it_ << " ";
+        std::cout << std::endl;
+    }
     return 0;
 }
-*/
