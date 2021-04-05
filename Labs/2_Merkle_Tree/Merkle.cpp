@@ -1,5 +1,5 @@
 #include <vector>
-#include <iostream>
+//#include <iostream>
 
 #pragma once
 unsigned long hash64shift(unsigned long key) {
@@ -37,16 +37,14 @@ private:
     node_t *root;           // Merkle root
     level_list *node_list;  // list to link leaf nodes
 
-    // re-compute the hash tree
+    // construct at one level
     void build_tree(level_list *&ls);
     // insert a hash value to the end of the level list
-    void insert(level_list *&ls, unsigned long hash_val);
+    void insert_tool_func(level_list *&ls, unsigned long hash_val);
+    // insert a hash value
+    void insert(unsigned long hash_val);
     // find the hash value in the leaf nodes
     node_t* find_node(unsigned long hash_value);
-    // insert in even position
-    void even_p();
-    // insert in odd position
-    void odd_p();
 
 public:
     Merkle_Tree();
@@ -67,8 +65,9 @@ Merkle_Tree::Merkle_Tree() {
 Merkle_Tree::Merkle_Tree(std::vector<unsigned long> leaf_nodes) {
     std::vector<unsigned long>::iterator last = leaf_nodes.end(); // point to the next of the last element(nullptr in fact)
     node_list = new level_list;
+    root = nullptr;
     for (std::vector<unsigned long>::iterator tmp = leaf_nodes.begin(); tmp != last; tmp++)
-        insert(node_list, *tmp);
+        insert(*tmp);
 }
 
 Merkle_Tree::~Merkle_Tree() {
@@ -87,71 +86,70 @@ Merkle_Tree::~Merkle_Tree() {
     }
 }
 
-// re-compute the hash tree after a new leaf node insert
+// construct at one level
 void Merkle_Tree::build_tree(level_list *&ls) {
-    // get the new insert node
-    node_t *new_node = ls->last_node;
-
-    unsigned long p_hash;
+    if (!ls)  // this level is not create yet
+        return;
+    
+    node_t *current_node = ls->last_node;
     level_list *current_level = ls;
-    if (ls == node_list && new_node->position == 1) {  // insert the first node
-        current_level->up_level = new level_list;
-        current_level = current_level->up_level;
-        root = current_level->first_node = new node_t(nullptr, new_node->hash_val, 1);
-        current_level->last_node = current_level->first_node;
-        new_node->parent = root;  // link
-    } else if (ls == node_list && new_node->position == 2) {  // insert the second node
-        root->hash_val = new_node->hash_val + new_node->prev->hash_val;
-        new_node->parent = root;
-    } else if (new_node->position % 2 == 0) {  // even postition
-        node_t *current_node = new_node;
-        // update all the current_nodes' hash value
-        while (current_node && current_node->prev && current_node->position != 2 ) {
-            if (current_node->position % 2 == 0) {
-                p_hash = current_node->hash_val + current_node->prev->hash_val;
-                if (!current_node->parent)
-                    current_node->parent = current_node->prev->parent;  // link
-            } else {
-                p_hash = current_node->hash_val;
+    unsigned long p_hash;
+    while (current_node != root) {
+        if (current_node->position % 2 == 0) {  // node at even position
+            node_t *pre = current_node->prev;
+            p_hash = hash64shift(current_node->hash_val + pre->hash_val);
+            if (pre->parent) {  // parent exits
+                current_node->parent = pre->parent;  // link
+                current_node = current_node->parent;
+                current_node->hash_val = p_hash;  // update parent hash value
+                current_level = current_level->up_level;  // go to upper level
+            } else {  // parent not exits, which means its position is 2
+                // new root
+                current_level->up_level = new level_list;
+                insert_tool_func(current_level->up_level, p_hash);
+                pre->parent = current_node->parent = current_level->up_level->last_node;  // link
+                root = current_node->parent;  // update root
+                return;
             }
-            current_node = current_node->parent;  // change current node to parent node
-            current_level = current_level->up_level;  // move to upper level
-            current_node->hash_val = p_hash;
+        } else if (current_node->position % 2 != 0) {  // node at odd position
+            p_hash = current_node->hash_val;
+            if (current_node->parent) {  // parent exist
+                current_node->parent->hash_val = p_hash;  // update parent hash value
+            } else {  // parent not exist, need to new a parent
+                insert_tool_func(current_level->up_level, p_hash);
+                current_node->parent = current_level->up_level->last_node;  // link
+            }
+            current_node = current_node->parent;
+            current_level = current_level->up_level;  // go to upper level
         }
-
-        if (current_node && current_node->position == 2 && !current_node->prev->parent) {  // update root
-            p_hash = current_node->hash_val + current_node->prev->hash_val;
-            current_level->up_level = new level_list;  // create a new level
-            current_level = current_level->up_level;
-            root = current_level->first_node = new node_t(nullptr, p_hash, 1);
-            current_level->last_node = current_level->first_node;
-            current_node->parent = current_node->prev->parent = root;  // link
-        } else {
-            p_hash = current_node->hash_val + current_node->prev->hash_val;
-            current_node->parent = current_node->prev->parent;  // link
-            current_node->parent->hash_val = p_hash;
-        }
-    } else {  // odd position, need to add new parent
-        p_hash = new_node->hash_val;
-        if (!new_node->parent && current_level->up_level) {
-            insert(current_level->up_level, p_hash);
-            new_node->parent = current_level->up_level->last_node;  // link
-        } else
-            new_node->parent->hash_val = p_hash;
     }
 }
 
 // insert a hash value to the end of the level list
-void Merkle_Tree::insert(level_list *&ls, unsigned long hash_val) {
-    if (!ls->first_node) {  // first leaf node
+void Merkle_Tree::insert_tool_func(level_list *&ls, unsigned long hash_val) {
+    if (!ls->first_node) {  // first node in this level
         ls->first_node = new node_t(nullptr, hash_val, 1);
         ls->last_node = ls->first_node;
     } else {
         ls->last_node->next = new node_t(ls->last_node, hash_val, ls->last_node->position+1);
         ls->last_node = ls->last_node->next;
     }
+}
 
-    build_tree(ls);
+// insert a hash value
+void Merkle_Tree::insert(unsigned long hash_val) {
+    // first insertion, need to initialize the root
+    if (!node_list->first_node) {
+        insert_tool_func(node_list, hash_val);
+        level_list *up = new  level_list;
+        insert_tool_func(up, hash_val);
+        node_list->up_level = up;
+        root = up->first_node;
+        node_list->first_node->parent = root;
+        return;
+    }
+    insert_tool_func(node_list, hash_val);
+    build_tree(node_list);
 }
 
 // find the hash value in the leaf nodes
@@ -177,7 +175,7 @@ std::vector<unsigned long> Merkle_Tree::getProof(unsigned long hash_value) {
                 list_re.push_back(node->prev->hash_val);
             else
                 list_re.push_back(0);
-        if (node->next && node->position %2 != 0)  // odd position
+        if (node->position %2 != 0)  // odd position
             if (node->next)
                 list_re.push_back(node->next->hash_val);
             else
@@ -189,7 +187,7 @@ std::vector<unsigned long> Merkle_Tree::getProof(unsigned long hash_value) {
 
 // insert a new leaf node to the Merkle Tree, need to re-compute the hash values of the tree
 void Merkle_Tree::addTransaction(unsigned long hash_value) {
-    insert(node_list, hash_value);
+    insert(hash_value);
 }
 
 //  return the root hash value of the Merkle Tree
@@ -199,16 +197,20 @@ unsigned long Merkle_Tree::getRootHash() {
     return root->hash_val;
 }
 
-int main() {
+/*
+int main(int argc, char **argv) {
     std::vector<unsigned long> leaf_node;
-    for(unsigned long i = 0; i < 8; i++)
-        leaf_node.push_back(i);
-    Merkle_Tree mt(leaf_node);
-    for (std::vector<unsigned long>::iterator it = leaf_node.begin(); it != leaf_node.end(); it++) {
-        std::vector<unsigned long> getp = mt.getProof(*it);
+    Merkle_Tree mt;
+    for(unsigned long i = 0; i < 6; i++)
+        mt.addTransaction(i);
+    //for (std::vector<unsigned long>::iterator it = leaf_node.begin(); it != leaf_node.end(); it++) {
+    for (unsigned long i = 0; i < 6; ++i) {
+        std::vector<unsigned long> getp = mt.getProof(i);
         for (std::vector<unsigned long>::iterator it_ = getp.begin(); it_ != getp.end(); it_++)
             std::cout << *it_ << " ";
         std::cout << std::endl;
     }
+    std::cout << mt.getRootHash() << std::endl;
     return 0;
 }
+*/
