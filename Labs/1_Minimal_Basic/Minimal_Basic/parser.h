@@ -2,7 +2,6 @@
 #define PARSER_H
 
 #include "exp.h"
-#include "statement.h"
 #include "program.h"
 // functions to parse a given expression
 
@@ -18,6 +17,5 @@ ExpressionType type_of_exp(QString in_str) {
         return COMPOUND;
 
 }
-
 
 #endif // PARSER_H

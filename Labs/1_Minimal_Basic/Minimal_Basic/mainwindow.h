@@ -4,7 +4,7 @@
 #include <QMainWindow>
 #include <QMap>
 #include "exp.h"
-#include "statement.h"
+#include "program.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -31,14 +31,21 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    EvaluationContext pro_data;
-    QMap<int, Statement> basic_program;
+    QMap<int, Statement> basic_program;  // hold all statements by line number
+    QMap<QString, int> variable;  // hold all variables by name
     void show_code();
     void show_help();
 
+    // handler for all kinds of statements
+    void rem_handler(Statement sta);
+    void let_handler(Statement sta);
+    void print_handler(Statement sta);
+    void input_handler(Statement sta);
+    void goto_handler(Statement sta);
+    void ifthen_handler(Statement sta);
+    void end_handler(Statement sta);
+
     //private static MainWindow instance = new MainWindow();
-    // singleton pattern
-    // cpp static member
-    // all in mainwindow
+    // singleton pattern or cpp static member
 };
 #endif // MAINWINDOW_H

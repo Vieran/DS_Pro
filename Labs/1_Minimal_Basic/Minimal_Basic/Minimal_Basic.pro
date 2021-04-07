@@ -21,14 +21,13 @@ SOURCES += \
     mainwindow.cpp \
     parser.cpp \
     program.cpp \
-    statement.cpp
+    sta_handler.cpp
 
 HEADERS += \
     exp.h \
     mainwindow.h \
     parser.h \
-    program.h \
-    statement.h
+    program.h
 
 FORMS += \
     mainwindow.ui
