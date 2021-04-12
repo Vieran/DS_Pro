@@ -3,19 +3,10 @@
 
 #include "exp.h"
 #include "program.h"
-// functions to parse a given expression
+#include <QDebug>
 
-ExpressionType type_of_exp(QString in_str) {
-    QRegExp clear_exp("\\s*(.*)\\s*");
-    clear_exp.indexIn(in_str);
-    QString clear_str = clear_exp.cap(1); // string with no blank at the begin and end
-    if (1)
-        return CONSTANT;
-    else if (0)
-        return IDENTIFIER;
-    else
-        return COMPOUND;
-
-}
+ExpressionType type_of_exp(QString in_str);
+void construct_exp_tree(Statement *sta, QString purify_sta);
+void construct_exp_tree_ifthen(Statement *sta, QString purify_sta);
 
 #endif // PARSER_H

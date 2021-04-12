@@ -21,7 +21,7 @@ enum ExpressionType{CONSTANT, IDENTIFIER, COMPOUND};
  */
 class Expression {
 public:
-    Expression(){}
+    Expression();
     virtual ~Expression();
     virtual int eval(EvaluationContext &context) = 0;
     virtual QString toString() = 0;
@@ -39,13 +39,11 @@ public:
 class ConstantExp : public Expression {
 public:
     ConstantExp(int val):value(val) {}
-    virtual ~ConstantExp(){}
+    virtual ~ConstantExp() {}
 
     virtual int eval(EvaluationContext &context);
     virtual QString toString();
     virtual ExpressionType type();
-
-    virtual int getConstatntValue();
 
 private:
     int value;
@@ -61,8 +59,6 @@ public:
     virtual QString toString();
     virtual ExpressionType type();
 
-    virtual QString getIdentifierName();
-
 private:
     QString name;
 };
@@ -70,7 +66,7 @@ private:
 /* Class: CompoundExp */
 class CompoundExp : public Expression {
 public:
-    CompoundExp(QString op, Expression *lhs, Expression *rhs):op(op), lhs(lhs), rhs(rhs){}
+    CompoundExp(QString op, Expression *lhs=nullptr, Expression *rhs=nullptr):op(op), lhs(lhs), rhs(rhs){}
     virtual ~CompoundExp(){}
 
     virtual int eval(EvaluationContext &context);

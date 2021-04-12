@@ -7,29 +7,31 @@
 void error(QString error_msg);
 
 enum STA{REM, LET, PRINT, INPUT, GOTO, IF_THEN, END};
-enum OP{equal, greater, less, add, sub, multi, divide, left_parenthesis, right_parenthesis}; // =><+-*/()
+enum OP{EQUAL, ADD, SUB, MULTI, DIVIDE, LEFT_PARENTHESIS, RIGHT_PARENTHESIS, NUMBER, VALUE, ENDOFSTR}; // =+-*/^()number value
+enum CONDITIONAL_OP{equal, less, greater};
 
 struct Statement {
     STA sta_type;
     QString statement;
+    Expression *exp_tree;
     Statement(QString in_str) {
         statement = in_str;
-        QRegExp reg_exp("\\s*(\\d+)\\s+(REM|LET|PRINT|INPUT|GOTO|IF|END).*");
+        QRegExp reg_exp("\\s*(\\d+)\\s+(REM|LET|PRINT|INPUT|GOTO|IF|END)(.*)");
         reg_exp.indexIn(in_str);
-        QString statement = reg_exp.cap(2);
-        if (statement == "REM")
+        QString sta_t = reg_exp.cap(2);
+        if (sta_t == "REM")
             sta_type = REM;
-        else if (statement == "LET")
+        else if (sta_t == "LET")
             sta_type = LET;
-        else if (statement == "PRINT")
+        else if (sta_t == "PRINT")
             sta_type = PRINT;
-        else if (statement == "INPUT")
+        else if (sta_t == "INPUT")
             sta_type = INPUT;
-        else if (statement == "GOTO")
+        else if (sta_t == "GOTO")
             sta_type = GOTO;
-        else if (statement == "IF")
+        else if (sta_t == "IF")
             sta_type = IF_THEN;
-        else if (statement == "END")
+        else if (sta_t == "END")
             sta_type = END;
         else // error occurs
             error("error in statement construct");

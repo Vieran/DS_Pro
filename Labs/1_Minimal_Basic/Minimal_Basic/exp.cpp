@@ -4,6 +4,7 @@
 
 /* Expression */
 // these are just default function implement
+Expression::Expression(){}
 Expression::~Expression(){}
 int Expression::getConstatntValue(){}
 QString Expression::getIdentifierName(){}
@@ -12,16 +13,16 @@ Expression* Expression::getLHS(){}
 Expression* Expression::getRHS(){}
 
 /* ConstanExp */
+int ConstantExp::eval(EvaluationContext &context) {
+    return value;
+}
+
 QString ConstantExp::toString() {
     return QString(value);
 }
 
 ExpressionType ConstantExp::type() {
     return CONSTANT;
-}
-
-int ConstantExp::getConstatntValue() {
-    return value;
 }
 
 /* IdentifierExp */
@@ -32,17 +33,11 @@ int IdentifierExp::eval(EvaluationContext &context) {
 }
 
 QString IdentifierExp::toString() {
-    if(!pro_data.isDefined(name))
-        error(name + " is not defined");
-    return QString(pro_data.getValue(name));
+    return name;
 }
 
 ExpressionType IdentifierExp::type() {
     return IDENTIFIER;
-}
-
-QString IdentifierExp::getIdentifierName() {
-    return name;
 }
 
 /* CompoundExp */
@@ -70,7 +65,9 @@ int CompoundExp::eval(EvaluationContext &context) {
 }
 
 // what does this func do?
-QString CompoundExp::toString() {}
+QString CompoundExp::toString() {
+    return getOperator();
+}
 
 ExpressionType CompoundExp::type() {
     return COMPOUND;

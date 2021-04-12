@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "program.h"
+#include "parser.h"
 #include <QFileDialog>
 #include <QDebug>
 #include <QMessageBox>
@@ -10,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    need_input_var = false;
 }
 
 MainWindow::~MainWindow()
@@ -23,7 +25,55 @@ void MainWindow::show_code() {
     QMap<int, Statement>::const_iterator tmp;
     tmp = basic_program.constBegin();
     while (tmp != basic_program.constEnd()) {
-        ui->CODE_text->append(tmp.value().origin);
+        ui->CODE_text->append(tmp.value().statement);
+        ++tmp;
+    }
+}
+
+// display a specific expression tree in the grammar_text box
+void MainWindow::display_exp(QString indent, Expression *expt) {
+    if (expt == nullptr)
+        return;
+
+    const QString tab = "    ";
+    indent += tab;
+    ui->GRAMMAR_text->append(indent + expt->toString());
+
+    display_exp(indent, expt->getLHS());
+    display_exp(indent, expt->getRHS());
+}
+
+// show the grammar tree in the grammar_text box
+void MainWindow::show_grammartree() {
+    ui->GRAMMAR_text->clear();  // clear the text first
+    QMap<int, Statement>::iterator tmp;
+    tmp = basic_program.begin();
+    Statement *current_sta;
+    while (tmp != basic_program.end()) {
+        current_sta = &(tmp.value());
+        switch (current_sta->sta_type) {
+        case REM:
+            rem_dis(current_sta);
+            break;
+        case END:
+            end_dis(current_sta);
+            break;
+        case LET:
+            let_dis(current_sta);
+            break;
+        case PRINT:
+            print_dis(current_sta);
+            break;
+        case INPUT:
+            input_dis(current_sta);
+            break;
+        case IF_THEN:
+            ifthen_dis(current_sta);
+            break;
+        case GOTO:
+            goto_dis(current_sta);
+            break;
+        }
         ++tmp;
     }
 }
@@ -75,16 +125,31 @@ void MainWindow::on_LOAD_clicked()
 void MainWindow::on_RUN_clicked()
 {
     // on click run button
-    // parsing
-    // show the grammar tree
-    // evaluating
+    // construct the expresstion tree
+    QMap<int, Statement>::iterator it = basic_program.begin();
+    while (it != basic_program.end()) {
+        //qDebug() << it.value().statement;
+        if (it.value().sta_type == LET)
+            let_handler(&(it.value()));
+        else if (it.value().sta_type == PRINT)
+            print_handler(&(it.value()));
+        else if (it.value().sta_type == INPUT)
+            input_handler(&(it.value()));
+        else if (it.value().sta_type == IF_THEN)
+            ifthen_handler(&(it.value()));
+        it++;
+    }
+    show_grammartree();
+
+    // run the program code
+    execute();
 }
 
 void MainWindow::on_CLEAR_clicked()
 {
    // on click clear button
     basic_program.clear();
-    pro_data.clear();
+    variable.clear();
     ui->CODE_text->clear();
     ui->RESULT_text->clear();
     ui->GRAMMAR_text->clear();
@@ -95,9 +160,9 @@ void MainWindow::on_COMMAND_text_returnPressed()
 {
    // press enter in command input box
     QString command = ui->COMMAND_text->text();
-    if (get_value) { // get the input
-        input_value = command;
-        get_value = false;
+    if(need_input_var){
+        variable.setValue(input_var, command.toUInt());
+        need_input_var = false;
     } else if (command == "QUIT") {
         exit(0);
     } else if (command == "HELP") {

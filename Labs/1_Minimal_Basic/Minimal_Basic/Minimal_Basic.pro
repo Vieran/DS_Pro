@@ -16,12 +16,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    display_func.cpp \
+    execute_func.cpp \
     exp.cpp \
+    handler_func.cpp \
     main.cpp \
     mainwindow.cpp \
     parser.cpp \
-    program.cpp \
-    sta_handler.cpp
+    program.cpp
 
 HEADERS += \
     exp.h \
