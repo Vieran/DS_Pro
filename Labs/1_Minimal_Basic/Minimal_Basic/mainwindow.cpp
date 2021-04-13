@@ -144,7 +144,7 @@ void MainWindow::on_RUN_clicked()
     show_grammartree();
 
     // run the program code
-    //execute();
+    execute();
 }
 
 void MainWindow::on_CLEAR_clicked()

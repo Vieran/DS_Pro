@@ -5,7 +5,8 @@
 #include <QRegExp>
 
 void MainWindow::execute() {
-    QMap<int, Statement>::iterator tmp;
+    ui->RESULT_text->clear();
+    QMap<int, Statement>::iterator tmp = basic_program.begin();
     Statement *current_sta = &(tmp.value());
     int next_line = -1;
     while (tmp != basic_program.end() && current_sta->sta_type != END) {

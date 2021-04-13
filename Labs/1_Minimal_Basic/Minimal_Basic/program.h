@@ -13,6 +13,7 @@ struct Statement {
     STA sta_type;
     QString statement;
     Expression *exp_tree;
+    void clear_expt(Expression *expt);
     Statement(QString in_str) {
         statement = in_str;
         QRegExp reg_exp("\\s*(\\d+)\\s+(REM|LET|PRINT|INPUT|GOTO|IF|END)(.*)");
@@ -34,8 +35,12 @@ struct Statement {
             sta_type = END;
         else // error occurs
             error("error in statement construct");
-        }
-};
 
+        exp_tree = nullptr;
+        }
+    ~Statement() {
+        clear_expt(exp_tree);
+    }
+};
 
 #endif // PROGRAM_H

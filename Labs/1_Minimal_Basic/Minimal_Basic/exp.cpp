@@ -41,6 +41,9 @@ QString IdentifierExp::toString() {
 ExpressionType IdentifierExp::type() {
     return IDENTIFIER;
 }
+QString IdentifierExp::getIdentifierName() {
+    return name;
+}
 
 /* CompoundExp */
 int CompoundExp::eval(EvaluationContext &context) {

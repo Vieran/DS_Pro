@@ -61,6 +61,8 @@ public:
     virtual QString toString();
     virtual ExpressionType type();
 
+    virtual QString getIdentifierName();
+
 private:
     QString name;
 };
