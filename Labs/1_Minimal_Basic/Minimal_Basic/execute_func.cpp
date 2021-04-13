@@ -40,9 +40,10 @@ void MainWindow::let_exe(Statement *sta) {
 
 void MainWindow::print_exe(Statement *sta) {
     int result = sta->exp_tree->eval(variable);
-    ui->RESULT_text->append(QString(result));
+    ui->RESULT_text->append(QString::number(result));
 }
 
+// return the line number when true
 int MainWindow::ifthen_exe(Statement *sta) {
     Expression *lhs = sta->exp_tree->getLHS();
     Expression *rhs = sta->exp_tree->getRHS();
@@ -58,6 +59,7 @@ int MainWindow::ifthen_exe(Statement *sta) {
     return -1;
 }
 
+// return the line number
 int MainWindow::goto_exe(Statement *sta) {
     QRegExp goto_pattern("\\s*\\d+\\s+GOTO\\s+(\\d+)");
     goto_pattern.indexIn(sta->statement);

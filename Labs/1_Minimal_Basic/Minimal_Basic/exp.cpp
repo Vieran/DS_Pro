@@ -11,6 +11,8 @@ QString Expression::getIdentifierName(){}
 QString Expression::getOperator(){}
 Expression* Expression::getLHS(){}
 Expression* Expression::getRHS(){}
+void Expression::setLHS(Expression *lhs_t){}
+void Expression::setRHS(Expression *rhs_t){}
 
 /* ConstanExp */
 int ConstantExp::eval(EvaluationContext &context) {
@@ -18,7 +20,7 @@ int ConstantExp::eval(EvaluationContext &context) {
 }
 
 QString ConstantExp::toString() {
-    return QString(value);
+    return QString::number(value);
 }
 
 ExpressionType ConstantExp::type() {
@@ -84,6 +86,12 @@ Expression* CompoundExp::getLHS() {
 
 Expression* CompoundExp::getRHS() {
     return rhs;
+}
+void CompoundExp::setLHS(Expression *lhs_t) {
+    lhs = lhs_t;
+}
+void CompoundExp::setRHS(Expression *rhs_t) {
+    rhs = rhs_t;
 }
 
 /* EvaluationContext */

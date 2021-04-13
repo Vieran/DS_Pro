@@ -7,8 +7,7 @@
 void error(QString error_msg);
 
 enum STA{REM, LET, PRINT, INPUT, GOTO, IF_THEN, END};
-enum OP{EQUAL, ADD, SUB, MULTI, DIVIDE, LEFT_PARENTHESIS, RIGHT_PARENTHESIS, NUMBER, VALUE, ENDOFSTR}; // =+-*/^()number value
-enum CONDITIONAL_OP{equal, less, greater};
+enum OP{EQUAL, ADD, SUB, MULTI, DIVIDE, LEFT_PARENTHESIS, RIGHT_PARENTHESIS, NUMBER, VALUE, ENDOFSTR}; // =+-*/^()number value eof
 
 struct Statement {
     STA sta_type;

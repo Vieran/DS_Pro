@@ -77,7 +77,9 @@ ExpressionType type_of_exp(QString in_str) {
 }
 
 // construct the expression tree
-void construct_exp_tree(Statement *sta, QString purify_sta) {
+// the last parameter is for determine where the exp_tree should be in the sta->exp_tree
+// note: the last para is not elegant at all, but it should work
+void construct_exp_tree(Statement *sta, QString purify_sta, int lmr) {
     QString value;
     int pos = 0;
     std::stack<QString> operator_stack;
@@ -167,10 +169,26 @@ void construct_exp_tree(Statement *sta, QString purify_sta) {
         operand_stack.push(tmp);
     }
 
-    sta->exp_tree = operand_stack.top();
+    switch (lmr) {
+    case -1:
+        sta->exp_tree->setLHS(operand_stack.top());
+        break;
+    case 0:
+        sta->exp_tree = operand_stack.top();
+        break;
+    case 1:
+        sta->exp_tree->setRHS(operand_stack.top());
+        break;
+    }
+
     operand_stack.pop();
 }
 
 // construct function for if_then statement
 void construct_exp_tree_ifthen(Statement *sta, QString purify_sta) {
+    QRegExp ifthen_pattern("(.*)\\s+(>|<|=)\\s+(.*)");
+    ifthen_pattern.indexIn(purify_sta);
+    sta->exp_tree = new CompoundExp(ifthen_pattern.cap(2));
+    construct_exp_tree(sta, ifthen_pattern.cap(1), -1);
+    construct_exp_tree(sta, ifthen_pattern.cap(3), 1);
 }

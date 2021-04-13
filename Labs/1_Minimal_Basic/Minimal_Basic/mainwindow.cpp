@@ -39,8 +39,10 @@ void MainWindow::display_exp(QString indent, Expression *expt) {
     indent += tab;
     ui->GRAMMAR_text->append(indent + expt->toString());
 
-    display_exp(indent, expt->getLHS());
-    display_exp(indent, expt->getRHS());
+    if (expt->type() == COMPOUND) {
+        display_exp(indent, expt->getLHS());
+        display_exp(indent, expt->getRHS());
+    }
 }
 
 // show the grammar tree in the grammar_text box
@@ -142,7 +144,7 @@ void MainWindow::on_RUN_clicked()
     show_grammartree();
 
     // run the program code
-    execute();
+    //execute();
 }
 
 void MainWindow::on_CLEAR_clicked()

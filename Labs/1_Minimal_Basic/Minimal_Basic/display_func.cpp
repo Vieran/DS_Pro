@@ -24,7 +24,8 @@ void MainWindow::let_dis(Statement *sta) {
     let_pattern.indexIn(sta->statement);
     ui->GRAMMAR_text->append(let_pattern.cap(1) + " LET =");
     QString indent  = "";
-    display_exp(indent, sta->exp_tree);
+    display_exp(indent, sta->exp_tree->getLHS());
+    display_exp(indent, sta->exp_tree->getRHS());
 }
 
 void MainWindow::print_dis(Statement *sta) {
@@ -47,8 +48,9 @@ void MainWindow::ifthen_dis(Statement *sta) {
     if_pattern.indexIn(sta->statement);
     ui->GRAMMAR_text->append(if_pattern.cap(1) + " IF THEN");
     QString indent  = "";
-    display_exp(indent, sta->exp_tree);
-    ui->GRAMMAR_text->append("    " + if_pattern.cap(3));
+    display_exp(indent, sta->exp_tree->getLHS());
+    ui->GRAMMAR_text->append("    " + sta->exp_tree->getOperator());
+    display_exp(indent, sta->exp_tree->getRHS());
 }
 
 void MainWindow::goto_dis(Statement *sta) {

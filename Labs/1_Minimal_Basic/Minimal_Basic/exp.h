@@ -33,6 +33,8 @@ public:
     virtual QString getOperator();
     virtual Expression* getLHS();
     virtual Expression* getRHS();
+    virtual void setLHS(Expression *lhs_t);
+    virtual void setRHS(Expression *rhs_t);
 };
 
 /* Class: ConstanExp */
@@ -76,6 +78,8 @@ public:
     virtual QString getOperator();
     virtual Expression *getLHS();
     virtual Expression *getRHS();
+    virtual void setLHS(Expression *lhs_t);
+    virtual void setRHS(Expression *rhs_t);
 
 private:
     QString op;
