@@ -1,3 +1,4 @@
+/* functions to display expression tree in the GRAMMAR_tree box */
 #include "program.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -29,7 +30,7 @@ void MainWindow::let_dis(Statement *sta) {
 }
 
 void MainWindow::print_dis(Statement *sta) {
-    QRegExp print_pattern("\\s*(\\d+)\\s+PRINT\\s+(\\w+)");
+    QRegExp print_pattern("\\s*(\\d+)\\s+PRINT\\s+(.*)");
     print_pattern.indexIn(sta->statement);
     ui->GRAMMAR_text->append(print_pattern.cap(1) + " PRINT");
     QString indent  = "";
@@ -51,6 +52,7 @@ void MainWindow::ifthen_dis(Statement *sta) {
     display_exp(indent, sta->exp_tree->getLHS());
     ui->GRAMMAR_text->append("    " + sta->exp_tree->getOperator());
     display_exp(indent, sta->exp_tree->getRHS());
+    ui->GRAMMAR_text->append("    " + if_pattern.cap(3));
 }
 
 void MainWindow::goto_dis(Statement *sta) {

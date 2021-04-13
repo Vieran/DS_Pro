@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    need_input_var = false;
+    error_occur = false;
 }
 
 MainWindow::~MainWindow()
@@ -90,6 +90,15 @@ void MainWindow::show_help() {
                              QMessageBox::Yes);
 }
 
+// handler error
+void MainWindow::error_handler(QString error_msg) {
+    QMessageBox::information(this,
+                             "ERROR",
+                             error_msg,
+                             QMessageBox::Ok);
+    error_occur = true;
+}
+
 // store the input command into basic_program
 void MainWindow::command_handler(QString in_str) {
     QRegExp reg_exp("\\s*(\\d+)\\s*.*");
@@ -127,6 +136,7 @@ void MainWindow::on_LOAD_clicked()
 void MainWindow::on_RUN_clicked()
 {
     // on click run button
+    error_occur = false;
     // construct the expresstion tree
     QMap<int, Statement>::iterator it = basic_program.begin();
     while (it != basic_program.end()) {
@@ -143,8 +153,13 @@ void MainWindow::on_RUN_clicked()
     }
     show_grammartree();
 
-    // run the program code
-    execute();
+    if (error_occur)
+        return;
+
+    if (!var_to_input.empty())
+        ui->COMMAND_input->setText("input: " + var_to_input.head());
+    else
+        execute();  // no variable to input, execute immediately
 }
 
 void MainWindow::on_CLEAR_clicked()
@@ -162,9 +177,14 @@ void MainWindow::on_COMMAND_text_returnPressed()
 {
    // press enter in command input box
     QString command = ui->COMMAND_text->text();
-    if(need_input_var){
-        variable.setValue(input_var, command.toUInt());
-        need_input_var = false;
+    if(!var_to_input.empty()){
+        variable.setValue(var_to_input.dequeue(), command.toUInt());
+        if (!var_to_input.empty())
+            ui->COMMAND_input->setText("input: " + var_to_input.head());
+        else {
+            execute();  // get all the variable and execute
+            ui->COMMAND_input->setText("GRAMMAR TREE");  // reset the input title
+        }
     } else if (command == "QUIT") {
         exit(0);
     } else if (command == "HELP") {

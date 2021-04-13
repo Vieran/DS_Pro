@@ -30,7 +30,7 @@ ExpressionType ConstantExp::type() {
 /* IdentifierExp */
 int IdentifierExp::eval(EvaluationContext &context) {
     if(!context.isDefined(name))
-        error(name + " is undefined");
+        throw (name + " is undefined");
     return context.getValue(name);
 }
 
@@ -62,10 +62,10 @@ int CompoundExp::eval(EvaluationContext &context) {
         return left * right;
     if(op == "/") {
         if(right == 0)
-            error("division by 0");
+            throw ("division by 0");
         return left / right;
     }
-    error("illegal operator in expression");
+    throw ("illegal operator in expression");
     return 0;
 }
 

@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QMap>
+#include <QQueue>
 #include "exp.h"
 #include "program.h"
 
@@ -33,12 +34,17 @@ private:
     Ui::MainWindow *ui;
     QMap<int, Statement> basic_program;  // hold all statements by line number
     EvaluationContext variable;
-    bool need_input_var;  // wait for input from user
-    QString input_var;
+    QQueue<QString> var_to_input;
+
+    // tool func
     void show_code();
     void display_exp(QString indent, Expression *expt);
     void show_grammartree();
     void show_help();
+
+    // handling error
+    bool error_occur;
+    void error_handler(QString error_msg);
 
     // display all kind of statements
     void rem_dis(Statement *sta);

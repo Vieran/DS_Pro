@@ -4,12 +4,13 @@
 #include <QString>
 #include <QRegExp>
 
+// traverse and execute all statement
 void MainWindow::execute() {
     ui->RESULT_text->clear();
     QMap<int, Statement>::iterator tmp = basic_program.begin();
     Statement *current_sta = &(tmp.value());
     int next_line = -1;
-    while (tmp != basic_program.end() && current_sta->sta_type != END) {
+    while (tmp != basic_program.end() && current_sta->sta_type != END && !error_occur) {
         current_sta = &(tmp.value());
         next_line = -1;
         switch (current_sta->sta_type) {
@@ -35,21 +36,38 @@ void MainWindow::execute() {
     }
 }
 
+// execute let statement
 void MainWindow::let_exe(Statement *sta) {
-    sta->exp_tree->eval(variable);
+    try {
+        sta->exp_tree->eval(variable);
+    } catch (QString error_msg) {
+        error_handler(error_msg);
+    }
 }
 
+// execute print statememt
 void MainWindow::print_exe(Statement *sta) {
-    int result = sta->exp_tree->eval(variable);
-    ui->RESULT_text->append(QString::number(result));
+    try {
+        int result = sta->exp_tree->eval(variable);
+        ui->RESULT_text->append(QString::number(result));
+    } catch (QString error_msg) {
+        error_handler(error_msg);
+    }
 }
 
+// execute if then statement
 // return the line number when true
 int MainWindow::ifthen_exe(Statement *sta) {
     Expression *lhs = sta->exp_tree->getLHS();
     Expression *rhs = sta->exp_tree->getRHS();
-    int left_result = lhs->eval(variable);
-    int right_result = rhs->eval(variable);
+    int left_result;
+    int right_result;
+    try {
+        left_result = lhs->eval(variable);
+        right_result = rhs->eval(variable);
+    } catch (QString error_msg) {
+        error_handler(error_msg);
+    }
     QString op = sta->exp_tree->getOperator();
 
     if ((op == "=" && left_result == right_result) || (op == ">" && left_result > right_result) || (op == "<" && left_result < right_result)) {
@@ -60,6 +78,7 @@ int MainWindow::ifthen_exe(Statement *sta) {
     return -1;
 }
 
+// execute goto statement
 // return the line number
 int MainWindow::goto_exe(Statement *sta) {
     QRegExp goto_pattern("\\s*\\d+\\s+GOTO\\s+(\\d+)");

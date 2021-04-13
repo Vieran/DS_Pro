@@ -3,6 +3,7 @@
 #include <stack>
 #include <string>
 
+// get the next efficient operand or operator
 static OP tokenizer(QString str, QString &identifier, int &pos) {
     identifier = "";
     int len = str.length();
@@ -84,7 +85,7 @@ void construct_exp_tree(Statement *sta, QString purify_sta, int lmr) {
     int pos = 0;
     std::stack<QString> operator_stack;
     std::stack<Expression*> operand_stack;
-    OP this_op;
+    OP this_op, last_op = ENDOFSTR;  // initialize the last_op not as NUMBER or VALUE is necessary
     QString top_op;
     Expression *tmp, *lhs, *rhs;
     int len = purify_sta.length();
@@ -113,7 +114,7 @@ void construct_exp_tree(Statement *sta, QString purify_sta, int lmr) {
                 operand_stack.push(tmp);
             }
             if (top_op != "(")  // not matching
-                error("no matching right parenthesis");
+                throw ("no matching right parenthesis");
             else
                 operator_stack.pop();  // pop the '('
             break;
@@ -146,14 +147,26 @@ void construct_exp_tree(Statement *sta, QString purify_sta, int lmr) {
             }
             if (this_op == ADD)
                 operator_stack.push("+");
-            else if (this_op == SUB)
-                operator_stack.push("-");
+            else if (this_op == SUB) {
+                if (last_op != NUMBER && last_op != VALUE) {  // consider a negative number
+                    this_op = tokenizer(purify_sta, value, pos);
+                    if (this_op == NUMBER)
+                        tmp =  new ConstantExp(-value.toUInt());
+                    else if (this_op == VALUE)
+                        tmp = new IdentifierExp("-"+ value);
+                    else
+                        throw ("error occurs when parsing!");
+                    operand_stack.push(tmp);
+                } else
+                    operator_stack.push("-");
+            }
             break;
         }
         case EQUAL:
             operator_stack.push("=");
             break;
         }
+        last_op = this_op;
         qDebug() << value;
     }
 
@@ -161,8 +174,12 @@ void construct_exp_tree(Statement *sta, QString purify_sta, int lmr) {
     while (!operator_stack.empty()) {
         top_op = operator_stack.top();
         operator_stack.pop();
+        if (operand_stack.empty())
+            throw ("error occurs when parsing!");
         rhs = operand_stack.top();
         operand_stack.pop();
+        if (operand_stack.empty())
+            throw ("error occurs when parsing!");
         lhs = operand_stack.top();
         operand_stack.pop();
         tmp = new CompoundExp(top_op, lhs, rhs);
