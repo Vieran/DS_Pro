@@ -2,7 +2,7 @@
 #include "parser.h"
 Statement::Statement(QString in_str) {
     statement = in_str;
-    QRegExp reg_exp("\\s*(\\d+)\\s+(REM|LET|PRINT|INPUT|GOTO|IF|END)(.*)");
+    QRegExp reg_exp("\\s*(\\d+)\\s+(\\w+)(.*)");
     reg_exp.indexIn(in_str);
     QString sta_t = reg_exp.cap(2);
     if (sta_t == "REM")

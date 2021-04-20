@@ -108,8 +108,16 @@ void MainWindow::command_handler(QString in_str) {
         // if the command is only a line number, then delete that line(what if there is some blank?)
         if (in_str.length() == reg_exp.cap(1).length())
             basic_program.remove(line_number);
-        else
+        else {
+            QRegExp reg_exp_("\\s*(\\d+)\\s+(\\w+)(.*)");
+            reg_exp_.indexIn(in_str);
+            QString tmp = reg_exp_.cap(2);
+            if (tmp != "REM" && tmp != "LET" && tmp != "PRINT" && tmp != "INPUT" && tmp != "GOTO" && tmp != "IF" && tmp != "END") {
+                error_handler("illegal statement");
+                return;
+            }
             basic_program.insert(line_number, in_str);
+        }
     } else
         show_help();
 }
@@ -195,7 +203,7 @@ void MainWindow::on_COMMAND_text_returnPressed()
         on_RUN_clicked();
     } else if (command == "CLEAR") {
         on_CLEAR_clicked();
-    } else {// input is regarded as statement command
+    } else {  // input is regarded as statement command
         command_handler(command);
     }
     ui->COMMAND_text->clear();
