@@ -16,7 +16,7 @@ struct NODE {
 class MemTable {
    private:
     NODE *head;
-    size_t num_of_nodes;
+    size_t memt_size;
 
    public:
     MemTable();

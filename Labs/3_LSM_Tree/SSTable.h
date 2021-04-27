@@ -15,9 +15,14 @@ class SSTable {
     } header;
 
     // bloom filter
-    char *bloom_filter;  // TODO: allocate memory for it in construction func
+    bool *bloom_filter;
     // index
+    struct INDEX {
+        uint64_t key;
+        uint32_t offset;
+    } *index;
     // data
+    std::string *data;
 
    public:
     SSTable();

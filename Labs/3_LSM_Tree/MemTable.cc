@@ -5,7 +5,7 @@
 
 MemTable::MemTable() {
     head = new NODE();
-    num_of_nodes = 0;
+    memt_size = 0;
 }
 
 MemTable::~MemTable() {
@@ -25,10 +25,10 @@ MemTable::~MemTable() {
 }
 
 // return the num of nodes in the memtable
-size_t MemTable::size() { return num_of_nodes; }
+size_t MemTable::size() { return memt_size; }
 
 std::string* MemTable::get(const int64_t &key) {
-    if (num_of_nodes == 0)
+    if (memt_size == 0)
         return nullptr;
     NODE *p = head;
     while (p) {
@@ -42,9 +42,10 @@ std::string* MemTable::get(const int64_t &key) {
     return nullptr;
 }
 
-// todo: need to handle exist node
 void MemTable::put(const int64_t &key, const std::string &val) {
-    remove(key);
+    size_t node_size = sizeof(int64_t) + val.capacity();
+    /* TODO: whether to put into sstable */
+
     std::vector<NODE *> pathlist;  // record the search path
     NODE *p = head;
     bool exist = false;
@@ -62,15 +63,18 @@ void MemTable::put(const int64_t &key, const std::string &val) {
 
     // update key-value pair
     if (exist) {
+        memt_size -= sizeof(p->val);
         while (p) {
             p->val = val;
             p = p->down;
         }
+        memt_size += sizeof(val);
         return;
     }
 
     bool insertUp = true;
     NODE *downNode = nullptr;
+    size_t new_node_size = 0;
     while (insertUp && pathlist.size() > 0) {
         NODE *insert = pathlist.back();
         pathlist.pop_back();
@@ -84,11 +88,11 @@ void MemTable::put(const int64_t &key, const std::string &val) {
         head->right = new NODE(nullptr, downNode, key, val);
         head->down = oldHead;
     }
-    num_of_nodes++;
+    memt_size += node_size;
 }
 
 bool MemTable::remove(const int64_t &key) {
-    if (num_of_nodes == 0)
+    if (memt_size == 0)
         return false;
     
     std::vector<NODE *> pathlist;  // record the search path
@@ -107,6 +111,7 @@ bool MemTable::remove(const int64_t &key) {
     // delete and link
     NODE *tmp;
     NODE *preNode;
+    size_t node_size = sizeof(int64_t) + pathlist.back()->val.capacity();
     while (!pathlist.empty()) {
         preNode = pathlist.back();
         if (preNode == head && head->right->right == nullptr)  // delete at top level
@@ -116,6 +121,6 @@ bool MemTable::remove(const int64_t &key) {
         free(tmp);
         pathlist.pop_back();
     }
-    num_of_nodes--;
+    memt_size -= node_size;
     return true;
 }
