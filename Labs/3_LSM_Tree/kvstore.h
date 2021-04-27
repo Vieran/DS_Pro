@@ -2,13 +2,13 @@
 
 #include "kvstore_api.h"
 #include "MemTable.h"
-#include "SSTable.h"
+#include "SSTable_handler.h"
 
 class KVStore : public KVStoreAPI {
 	// You can add your implementation here
 private:
 	MemTable memt;
-	SSTable sst;
+	SSTable_handler *sst_h;
 
 public:
 	KVStore(const std::string &dir);
