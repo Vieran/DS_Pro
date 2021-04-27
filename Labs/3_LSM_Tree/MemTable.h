@@ -1,6 +1,5 @@
 /* definition of the MemTable */
-#ifndef MEMTABLE_H
-#define MEMTABLE_H
+#pragma once
 
 #include <cstdint>
 #include <string>
@@ -13,6 +12,7 @@ struct NODE {
         : right(right), down(down), key(key), val(val) {}
     NODE(): right(nullptr), down(nullptr) {}
 };
+
 class MemTable {
    private:
     NODE *head;
@@ -26,5 +26,3 @@ class MemTable {
     void put(const int64_t &key, const std::string &val);
     bool remove(const int64_t &key);
 };
-
-#endif  //  MEMTABLE_H
