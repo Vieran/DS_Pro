@@ -1,4 +1,7 @@
 /* definition of the MemTable */
+#ifndef MEMTABLE_H
+#define MEMTABLE_H
+
 #include <cstdint>
 #include <string>
 
@@ -23,3 +26,5 @@ class MemTable {
     void put(const int64_t &key, const std::string &val);
     bool remove(const int64_t &key);
 };
+
+#endif  //  MEMTABLE_H

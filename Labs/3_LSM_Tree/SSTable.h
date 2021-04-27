@@ -1,6 +1,8 @@
 /* definition of the SSTable */
-#include <cstdint>
+#ifndef SSTABLE_H
+#define SSTABLE_H
 
+#include <cstdint>
 #include "MemTable.h"
 
 class SSTable {
@@ -25,3 +27,5 @@ class SSTable {
     std::string find(int64_t key);
     uint64_t get_timestamp(SSTable *sst);
 };
+
+#endif  //  SSTABLE_H
