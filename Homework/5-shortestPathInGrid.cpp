@@ -58,6 +58,7 @@ int shortestPathInGrid(vector<vector<int>>& grid, int k) {
     return -1;
 }
 // how can this search the "shortest" path? it just search a posible path
+// ---because it is a level search! each step takes the same weight
 // remember no cheating
 
 /*
