@@ -13,7 +13,7 @@
 class EvaluationContext;
 
 /* type of the expression */
-enum ExpressionType{CONSTANT, IDENTIFIER, COMPOUND};
+enum ExpressionType{CONSTANT, IDENTIFIER, COMPOUND, STRING};
 
 /* Class: Expression
  * represent a node in an expression tree
@@ -88,18 +88,33 @@ private:
     Expression *lhs, *rhs;
 };
 
+class StringExp : public Expression {
+public:
+    StringExp(QString str):str(str) {}
+    virtual int eval(EvaluationContext &context);
+    virtual QString toString();
+    virtual ExpressionType type();
+
+private:
+    QString str;
+};
+
 /* Class: EvaluationContext
  * encapsulate the information that the evaluator needs to know in order to evaluate an expresssion
  */
 class EvaluationContext {
 public:
     void setValue(QString var, int value);
+    void setString(QString var, QString value);
     int getValue(QString var);
+    QString getStr(QString var);
     bool isDefined(QString var);
+    bool str_isDefined(QString var);
     void clear();
 
 private:
     QMap<QString, int> symbolTable;
+    QMap<QString, QString> stringTable;  // store string variable
 };
 
 #endif // EXP_H

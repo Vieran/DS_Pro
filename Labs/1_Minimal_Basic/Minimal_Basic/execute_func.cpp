@@ -3,6 +3,7 @@
 #include "ui_mainwindow.h"
 #include <QString>
 #include <QRegExp>
+#include <QDebug>
 
 // traverse and execute all statement
 void MainWindow::execute() {
@@ -12,15 +13,27 @@ void MainWindow::execute() {
     int next_line = -1;
     while (tmp != basic_program.end() && current_sta->sta_type != END && !error_occur) {
         current_sta = &(tmp.value());
+        if (!var_to_input.empty()) {
+            ui->COMMAND_input->setText("input: " + var_to_input.head().var);
+        }
         next_line = -1;
         switch (current_sta->sta_type) {
-        case REM: case END: case INPUT:
+        case REM: case END:
+            break;
+        case INPUT:
+            input_exe(current_sta);
+            break;
+        case INPUTS:
+            inputs_exe(current_sta);
             break;
         case LET:
             let_exe(current_sta);
             break;
         case PRINT:
             print_exe(current_sta);
+            break;
+        case PRINTF:
+            printf_exe(current_sta);
             break;
         case IF_THEN:
             next_line = ifthen_exe(current_sta);
@@ -53,6 +66,115 @@ void MainWindow::print_exe(Statement *sta) {
     } catch (QString error_msg) {
         error_handler(error_msg);
     }
+}
+
+// fetch the var from the context
+static inline QString get_var(QString var, EvaluationContext &context) {
+    var = var.trimmed();
+    int len = var.length();
+    QString output = "";
+    if ((var.at(0) == "\"" && var.at(len - 1) == "\"") || (var.at(0) == "\'" && var.at(len - 1) == "\'"))
+        return var.mid(1, len - 2);
+    else if (var.at(0).isNumber()) {
+        int pos = 0;
+        while (pos < len) {
+            if (!var.at(pos).isNumber()) {
+                throw ("error when dealing with the printf statement!");
+                return "";
+            }
+            pos++;
+        }
+        return var;
+    } else if (context.isDefined(var))
+        return QString::number(context.getValue(var));
+    else if (context.str_isDefined(var))
+        return context.getStr(var);
+    else
+        throw (var + " not defined!");
+}
+
+// get the output pattern
+static inline QString get_str(QString str, int &pos) {
+    QChar tmp = str.at(pos);
+
+    // remove the blank
+    while ((tmp = str.at(pos)) == " ")
+        pos++;
+
+    if (tmp != "\"" && tmp != "'") {
+        throw ("no comma found!");
+        return "";
+    }
+
+    QString comma = tmp;  // record the first comma
+    pos++;
+    QString output = "";
+    int len = str.length();
+    while (pos < len && (tmp = str.at(pos)) != comma) {
+        output += tmp;
+        pos++;
+    }
+
+    // move pos to the first ","
+    while (pos < len && (tmp = str.at(pos)) != ",")
+        pos++;
+    return output;
+}
+
+// execute printf statement
+void MainWindow::printf_exe(Statement *sta) {
+    QRegExp printf_pattern("\\s*\\d+\\s+PRINTF\\s+\(.*)");
+    printf_pattern.indexIn(sta->statement);
+    QString origin_str = printf_pattern.cap(1);
+    int pos = 0;
+    QString str = get_str(origin_str, pos);  // the string pattern
+    QStringList var_list = origin_str.mid(pos+1, -1).split(",");  // variable list
+    QString output = "";  // string to show on the box
+    QString var;  // the variable to fill in
+    int str_pos = 0, var_pos = 0;
+    int str_len = str.length();
+    while (str_pos < str_len) {
+        QChar tmp = str.at(str_pos);
+        if (tmp != "{") {
+            output += tmp;
+            str_pos++;
+            continue;
+        } else {
+            if (var_pos > var_list.size()) {
+                throw ("no enougth var to fill in!");
+                return;
+            }
+            var = var_list[var_pos];
+            var_pos++;
+            try {
+                output += get_var(var, variable);
+            } catch (QString error_msg) {
+                error_handler(error_msg);
+                return;
+            }
+            str_pos += 2;  // {} take two palces
+        }
+    }
+    ui->RESULT_text->append(output);
+}
+
+// execute input statement
+void MainWindow::input_exe(Statement *sta) {
+    QRegExp input_pattern("\\s*\\d+\\s+INPUT\\s+(\\w+)");
+    input_pattern.indexIn(sta->statement);
+    QString input_var;
+    input_var = input_pattern.cap(1);
+    var_in to_input(input_var, INTEGER_VAR);
+    var_to_input.push_back(to_input);
+}
+
+void MainWindow::inputs_exe(Statement *sta) {
+    QRegExp input_pattern("\\s*\\d+\\s+INPUTS\\s+(\\w+)");
+    input_pattern.indexIn(sta->statement);
+    QString input_string;
+    input_string = input_pattern.cap(1);
+    var_in to_input(input_string, STRING_VAR);
+    var_to_input.push_back(to_input);
 }
 
 // execute if then statement

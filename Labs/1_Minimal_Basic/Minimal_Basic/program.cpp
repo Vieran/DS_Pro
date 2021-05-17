@@ -11,8 +11,12 @@ Statement::Statement(QString in_str) {
         sta_type = LET;
     else if (sta_t == "PRINT")
         sta_type = PRINT;
+    else if (sta_t == "PRINTF")
+        sta_type = PRINTF;
     else if (sta_t == "INPUT")
         sta_type = INPUT;
+    else if (sta_t == "INPUTS")
+        sta_type = INPUTS;
     else if (sta_t == "GOTO")
         sta_type = GOTO;
     else if (sta_t == "IF")

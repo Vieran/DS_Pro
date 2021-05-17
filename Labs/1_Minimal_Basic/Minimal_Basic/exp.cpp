@@ -47,6 +47,12 @@ QString IdentifierExp::getIdentifierName() {
 
 /* CompoundExp */
 int CompoundExp::eval(EvaluationContext &context) {
+    // handle string variable
+    if (rhs->type() == STRING) {
+        context.setString(lhs->toString(), rhs->toString());
+        return 0;
+    }
+
     int right = rhs->eval(context);
     if(op == "=") {
         context.setValue(lhs->getIdentifierName(), right);
@@ -97,17 +103,42 @@ void CompoundExp::setRHS(Expression *rhs_t) {
     rhs = rhs_t;
 }
 
+/* StringExp */
+int StringExp::eval(EvaluationContext &context) {
+    return 0;
+}
+
+QString StringExp::toString(){
+    return str;
+}
+
+ExpressionType StringExp::type() {
+    return STRING;
+}
+
 /* EvaluationContext */
 void EvaluationContext::setValue(QString var, int value) {
     symbolTable.insert(var, value);
+}
+
+void EvaluationContext::setString(QString var, QString value) {
+    stringTable.insert(var, value);
 }
 
 int EvaluationContext::getValue(QString var) {
     return symbolTable.value(var);
 }
 
+QString EvaluationContext::getStr(QString var) {
+    return stringTable.value(var);
+}
+
 bool EvaluationContext::isDefined(QString var) {
     return symbolTable.contains(var);
+}
+
+bool EvaluationContext::str_isDefined(QString var) {
+    return stringTable.contains(var);
 }
 
 // delete all the elements

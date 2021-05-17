@@ -15,7 +15,6 @@ static OP tokenizer(QString str, QString &identifier, int &pos) {
 
     if (pos == len)
         return ENDOFSTR;
-
     // identifier
     if (tmp == '_' || tmp.isLetter()) {
         while (pos < len && ((tmp = str.at(pos)) == '_' || tmp.isLetterOrNumber())) {
@@ -26,12 +25,27 @@ static OP tokenizer(QString str, QString &identifier, int &pos) {
     }
 
     // number
-    if (tmp.isNumber()){
+    if (tmp.isNumber()) {
         while (pos < len && (tmp = str.at(pos)).isNumber()) {
             identifier += tmp;
             pos++;
         }
         return NUMBER;
+    }
+
+    // string
+    // NOTE: this only deal with the let_exp with string
+    if (tmp == "\"" || tmp == "\'") {
+        QString quotation_mark = tmp;  // store the quotation mark first
+        pos++;
+        while (pos < len && (tmp = str.at(pos)) != quotation_mark) {
+            identifier += tmp;  // store the string in this variable
+            pos++;
+        }
+        if (tmp != quotation_mark)
+            throw ("error! not a legal string variable---quotation not map");
+        else
+            return STR;
     }
 
     // operator
@@ -148,7 +162,7 @@ void construct_exp_tree(Statement *sta, QString purify_sta, int lmr) {
             if (this_op == ADD)
                 operator_stack.push("+");
             else if (this_op == SUB) {
-                if (last_op != NUMBER && last_op != VALUE) {  // consider a negative number
+                if (last_op != NUMBER && last_op != VALUE && last_op != RIGHT_PARENTHESIS) {  // consider a negative number
                     this_op = tokenizer(purify_sta, value, pos);
                     if (this_op == NUMBER)
                         tmp =  new ConstantExp(-value.toUInt());
@@ -165,6 +179,15 @@ void construct_exp_tree(Statement *sta, QString purify_sta, int lmr) {
         case EQUAL:
             operator_stack.push("=");
             break;
+        case STR:  // in this case, "value" store the string
+            if (operator_stack.size() == 1 && operand_stack.size() == 1 && operator_stack.top() == "=") {
+                //  get string value
+                top_op = operator_stack.top();
+                lhs = operand_stack.top();
+                rhs = new StringExp(value);
+                sta->exp_tree = new CompoundExp(top_op, lhs, rhs);
+                return;
+            }
         }
         last_op = this_op;
         qDebug() << value;

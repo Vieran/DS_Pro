@@ -34,7 +34,7 @@ private:
     Ui::MainWindow *ui;
     QMap<int, Statement> basic_program;  // hold all statements by line number
     EvaluationContext variable;
-    QQueue<QString> var_to_input;
+    QQueue<var_in> var_to_input;
 
     // tool func
     void show_code();
@@ -51,22 +51,30 @@ private:
     void end_dis(Statement *sta);
     void let_dis(Statement *sta);
     void print_dis(Statement *sta);
+    void printf_dis(Statement *sta);
     void input_dis(Statement *sta);
+    void inputs_dis(Statement *sta);
     void ifthen_dis(Statement *sta);
     void goto_dis(Statement *sta);
 
     // functions for constructing some kind of statements
     void let_handler(Statement *sta);
     void print_handler(Statement *sta);
-    void input_handler(Statement *sta);
+    void printf_handler(Statement *sta);
     void ifthen_handler(Statement *sta);
 
     // execute
     void execute();
     void let_exe(Statement *sta);
     void print_exe(Statement *sta);
+    void printf_exe(Statement *sta);  // todo
+    void input_exe(Statement *sta);
+    void inputs_exe(Statement *sta);
     int ifthen_exe(Statement *sta);
     int goto_exe(Statement *sta);
+
+    // add new functions
+    void highlight();
 
     //private static MainWindow instance = new MainWindow();
     // singleton pattern or cpp static member

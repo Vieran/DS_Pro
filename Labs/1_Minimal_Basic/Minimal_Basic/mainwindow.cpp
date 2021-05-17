@@ -28,6 +28,7 @@ void MainWindow::show_code() {
         ui->CODE_text->append(tmp.value().statement);
         ++tmp;
     }
+    highlight();
 }
 
 // display a specific expression tree in the grammar_text box
@@ -66,8 +67,14 @@ void MainWindow::show_grammartree() {
         case PRINT:
             print_dis(current_sta);
             break;
+        case PRINTF:
+            printf_dis(current_sta);
+            break;
         case INPUT:
             input_dis(current_sta);
+            break;
+        case INPUTS:
+            inputs_dis(current_sta);
             break;
         case IF_THEN:
             ifthen_dis(current_sta);
@@ -112,7 +119,7 @@ void MainWindow::command_handler(QString in_str) {
             QRegExp reg_exp_("\\s*(\\d+)\\s+(\\w+)(.*)");
             reg_exp_.indexIn(in_str);
             QString tmp = reg_exp_.cap(2);
-            if (tmp != "REM" && tmp != "LET" && tmp != "PRINT" && tmp != "INPUT" && tmp != "GOTO" && tmp != "IF" && tmp != "END") {
+            if (tmp != "REM" && tmp != "LET" && tmp != "PRINT" && tmp != "PRINTF" && tmp != "INPUT" && tmp != "INPUTS" && tmp != "GOTO" && tmp != "IF" && tmp != "END") {
                 error_handler("illegal statement");
                 return;
             }
@@ -153,8 +160,8 @@ void MainWindow::on_RUN_clicked()
             let_handler(&(it.value()));
         else if (it.value().sta_type == PRINT)
             print_handler(&(it.value()));
-        else if (it.value().sta_type == INPUT)
-            input_handler(&(it.value()));
+        else if (it.value().sta_type == PRINTF)
+            printf_handler(&(it.value()));
         else if (it.value().sta_type == IF_THEN)
             ifthen_handler(&(it.value()));
         it++;
@@ -164,10 +171,13 @@ void MainWindow::on_RUN_clicked()
     if (error_occur)
         return;
 
+    /*
     if (!var_to_input.empty())
-        ui->COMMAND_input->setText("input: " + var_to_input.head());
+        ui->COMMAND_input->setText("input: " + var_to_input.head().var);
     else
         execute();  // no variable to input, execute immediately
+        */
+    execute();
 }
 
 void MainWindow::on_CLEAR_clicked()
@@ -186,11 +196,19 @@ void MainWindow::on_COMMAND_text_returnPressed()
    // press enter in command input box
     QString command = ui->COMMAND_text->text();
     if(!var_to_input.empty()){
-        variable.setValue(var_to_input.dequeue(), command.toUInt());
+        var_in input_var = var_to_input.dequeue();
+        if (input_var.type == INTEGER_VAR) {
+            if (command.at(0) == "-")
+                variable.setValue(input_var.var, -(command.mid(1,-1).toUInt()));
+            else
+                variable.setValue(input_var.var, command.toUInt());
+        }
+        else
+            variable.setString(input_var.var, command);
         if (!var_to_input.empty())
-            ui->COMMAND_input->setText("input: " + var_to_input.head());
+            ui->COMMAND_input->setText("input: " + var_to_input.head().var);
         else {
-            execute();  // get all the variable and execute
+            //execute();  // get all the variable and execute
             ui->COMMAND_input->setText("GRAMMAR TREE");  // reset the input title
         }
     } else if (command == "QUIT") {
@@ -208,4 +226,34 @@ void MainWindow::on_COMMAND_text_returnPressed()
     }
     ui->COMMAND_text->clear();
     show_code();
+}
+
+void MainWindow::highlight() {
+    // get the highlight object
+    QTextEdit *code = ui->CODE_text;
+    QTextCursor cursor(code->document());
+
+    // create a list to highlight
+    QList<QTextEdit::ExtraSelection> extras;
+    // the int of qpair denotes the position of all string
+    QList<QPair<int, QColor>> highlights = {
+        {1, QColor(100, 255, 100)},
+        {100, QColor(255, 100, 100)},
+        {200, QColor(255, 100, 100)}
+    };
+
+    // configure high light
+    for(auto &line:highlights) {
+        QTextEdit::ExtraSelection h;
+        h.cursor = cursor;
+        h.cursor.setPosition(line.first);// set the cursor to the character
+        h.cursor.movePosition(QTextCursor::StartOfLine);
+        h.cursor.movePosition(QTextCursor::EndOfLine);
+        h.format.setProperty(QTextFormat::FullWidthSelection, true);
+        h.format.setBackground(line.second);
+        extras.append(h);
+    }
+
+    // apply highlight
+    code->setExtraSelections(extras);
 }

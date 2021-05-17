@@ -33,8 +33,16 @@ void MainWindow::print_dis(Statement *sta) {
     QRegExp print_pattern("\\s*(\\d+)\\s+PRINT\\s+(.*)");
     print_pattern.indexIn(sta->statement);
     ui->GRAMMAR_text->append(print_pattern.cap(1) + " PRINT");
-    QString indent  = "";
+    QString indent = "";
     display_exp(indent, sta->exp_tree);
+}
+
+void MainWindow::printf_dis(Statement *sta) {
+    // just display all the statement in one line
+    QRegExp printf_pattern("\\s*(\\d+)\\s+PRINTF\\s+(.*)");
+    printf_pattern.indexIn(sta->statement);
+    ui->GRAMMAR_text->append(printf_pattern.cap(1) + " PRINTF");
+    ui->GRAMMAR_text->append("    " + printf_pattern.cap(2));
 }
 
 void MainWindow::input_dis(Statement *sta) {
@@ -42,6 +50,13 @@ void MainWindow::input_dis(Statement *sta) {
     input_pattern.indexIn(sta->statement);
     ui->GRAMMAR_text->append(input_pattern.cap(1) + " INPUT");
     ui->GRAMMAR_text->append("    " + input_pattern.cap(2));
+}
+
+void MainWindow::inputs_dis(Statement *sta) {
+    QRegExp inputs_pattern("\\s*(\\d+)\\s+INPUTS\\s+(\\w+)");
+    inputs_pattern.indexIn(sta->statement);
+    ui->GRAMMAR_text->append(inputs_pattern.cap(1) + " INPUTS");
+    ui->GRAMMAR_text->append("    " + inputs_pattern.cap(2));
 }
 
 void MainWindow::ifthen_dis(Statement *sta) {

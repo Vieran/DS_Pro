@@ -30,13 +30,9 @@ void MainWindow::print_handler(Statement *sta) {
     }
 }
 
-// construct input statement
-void MainWindow::input_handler(Statement *sta) {
-    QRegExp input_pattern("\\s*\\d+\\s+INPUT\\s+(\\w+)");
-    input_pattern.indexIn(sta->statement);
-    QString input_var;
-    input_var = input_pattern.cap(1);
-    var_to_input.push_back(input_var);
+// construct printf statement
+void MainWindow::printf_handler(Statement *sta) {
+    // this function do nothing, execute function will do everything
 }
 
 // construct if_then statement
