@@ -12,6 +12,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     error_occur = false;
+    next_line = -1;
 }
 
 MainWindow::~MainWindow()
@@ -28,7 +29,7 @@ void MainWindow::show_code() {
         ui->CODE_text->append(tmp.value().statement);
         ++tmp;
     }
-    highlight();
+    //highlight();
 }
 
 // display a specific expression tree in the grammar_text box
@@ -152,6 +153,11 @@ void MainWindow::on_RUN_clicked()
 {
     // on click run button
     error_occur = false;
+    // prepare for re-run
+    ui->COMMAND_input->setText("COMMAND INPUT");
+    var_to_input.clear();
+    variable.clear();
+    next_line = basic_program.firstKey();  // initialize for the execution
     // construct the expresstion tree
     QMap<int, Statement>::iterator it = basic_program.begin();
     while (it != basic_program.end()) {
@@ -171,12 +177,7 @@ void MainWindow::on_RUN_clicked()
     if (error_occur)
         return;
 
-    /*
-    if (!var_to_input.empty())
-        ui->COMMAND_input->setText("input: " + var_to_input.head().var);
-    else
-        execute();  // no variable to input, execute immediately
-        */
+    ui->RESULT_text->clear();
     execute();
 }
 
@@ -202,15 +203,10 @@ void MainWindow::on_COMMAND_text_returnPressed()
                 variable.setValue(input_var.var, -(command.mid(1,-1).toUInt()));
             else
                 variable.setValue(input_var.var, command.toUInt());
-        }
-        else
+        } else
             variable.setString(input_var.var, command);
-        if (!var_to_input.empty())
-            ui->COMMAND_input->setText("input: " + var_to_input.head().var);
-        else {
-            //execute();  // get all the variable and execute
-            ui->COMMAND_input->setText("GRAMMAR TREE");  // reset the input title
-        }
+        ui->COMMAND_input->setText("COMMAND INPUT");
+        execute();
     } else if (command == "QUIT") {
         exit(0);
     } else if (command == "HELP") {

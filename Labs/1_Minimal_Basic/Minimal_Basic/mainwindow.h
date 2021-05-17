@@ -35,6 +35,7 @@ private:
     QMap<int, Statement> basic_program;  // hold all statements by line number
     EvaluationContext variable;
     QQueue<var_in> var_to_input;
+    int next_line;  // pc for the execution
 
     // tool func
     void show_code();
@@ -78,5 +79,6 @@ private:
 
     //private static MainWindow instance = new MainWindow();
     // singleton pattern or cpp static member
+    // qeventloop
 };
 #endif // MAINWINDOW_H

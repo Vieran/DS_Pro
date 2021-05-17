@@ -7,19 +7,16 @@
 
 // traverse and execute all statement
 void MainWindow::execute() {
-    ui->RESULT_text->clear();
-    QMap<int, Statement>::iterator tmp = basic_program.begin();
-    Statement *current_sta = &(tmp.value());
-    int next_line = -1;
-    while (tmp != basic_program.end() && current_sta->sta_type != END && !error_occur) {
-        current_sta = &(tmp.value());
-        if (!var_to_input.empty()) {
-            ui->COMMAND_input->setText("input: " + var_to_input.head().var);
-        }
-        next_line = -1;
+    QMap<int, Statement>::iterator tmp = basic_program.find(next_line);
+    int tmp_line;
+    while (tmp != basic_program.end() && !error_occur) {
+        Statement *current_sta = &(tmp.value());
+        next_line = (++tmp).key();
         switch (current_sta->sta_type) {
-        case REM: case END:
+        case REM:
             break;
+        case END:
+            return;
         case INPUT:
             input_exe(current_sta);
             break;
@@ -36,16 +33,21 @@ void MainWindow::execute() {
             printf_exe(current_sta);
             break;
         case IF_THEN:
-            next_line = ifthen_exe(current_sta);
+            tmp_line = ifthen_exe(current_sta);
+            if (tmp_line != -1)
+                next_line = tmp_line;
             break;
         case GOTO:
-            next_line = goto_exe(current_sta);
+            tmp_line = goto_exe(current_sta);
+            if (tmp_line != -1)
+                next_line = tmp_line;
             break;
         }
-        if (next_line != -1)
-            tmp = basic_program.find(next_line);
-        else
-            tmp++;
+        if (!var_to_input.empty()) {
+            ui->COMMAND_input->setText("input: " + var_to_input.head().var);
+            return;
+        }
+        tmp = basic_program.find(next_line);
     }
 }
 
