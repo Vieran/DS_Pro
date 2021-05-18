@@ -45,7 +45,7 @@
      <rect>
       <x>20</x>
       <y>446</y>
-      <width>751</width>
+      <width>91</width>
       <height>20</height>
      </rect>
     </property>
@@ -58,7 +58,7 @@
      <rect>
       <x>20</x>
       <y>470</y>
-      <width>751</width>
+      <width>360</width>
       <height>380</height>
      </rect>
     </property>
@@ -68,7 +68,7 @@
      <rect>
       <x>20</x>
       <y>860</y>
-      <width>210</width>
+      <width>170</width>
       <height>25</height>
      </rect>
     </property>
@@ -79,9 +79,9 @@
    <widget class="QPushButton" name="RUN">
     <property name="geometry">
      <rect>
-      <x>290</x>
+      <x>210</x>
       <y>860</y>
-      <width>210</width>
+      <width>170</width>
       <height>25</height>
      </rect>
     </property>
@@ -92,9 +92,9 @@
    <widget class="QPushButton" name="CLEAR">
     <property name="geometry">
      <rect>
-      <x>560</x>
+      <x>600</x>
       <y>860</y>
-      <width>210</width>
+      <width>170</width>
       <height>25</height>
      </rect>
     </property>
@@ -143,6 +143,42 @@
       <width>360</width>
       <height>400</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="DEBUG_STEP">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>860</y>
+      <width>170</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>DEBUG/STEP</string>
+    </property>
+   </widget>
+   <widget class="QTextBrowser" name="CURRENT_VAR_text">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>470</y>
+      <width>360</width>
+      <height>380</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="CURRENT_VAR">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>450</y>
+      <width>121</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>CURRENT VARIABLE</string>
     </property>
    </widget>
   </widget>

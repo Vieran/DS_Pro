@@ -133,6 +133,14 @@ QString EvaluationContext::getStr(QString var) {
     return stringTable.value(var);
 }
 
+QList<QString> EvaluationContext::keys_i() {
+    return symbolTable.keys();
+}
+
+QList<QString> EvaluationContext::keys_s() {
+    return stringTable.keys();
+}
+
 bool EvaluationContext::isDefined(QString var) {
     return symbolTable.contains(var);
 }

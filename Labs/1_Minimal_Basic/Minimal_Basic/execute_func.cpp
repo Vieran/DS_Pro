@@ -10,6 +10,7 @@ void MainWindow::execute() {
     QMap<int, Statement>::iterator tmp = basic_program.find(next_line);
     int tmp_line;
     while (tmp != basic_program.end() && !error_occur) {
+        show_variable();
         Statement *current_sta = &(tmp.value());
         next_line = (++tmp).key();
         switch (current_sta->sta_type) {
@@ -208,4 +209,40 @@ int MainWindow::goto_exe(Statement *sta) {
     QRegExp goto_pattern("\\s*\\d+\\s+GOTO\\s+(\\d+)");
     goto_pattern.indexIn(sta->statement);
     return goto_pattern.cap(1).toUInt();
+}
+
+int MainWindow::single_cmd_exe(Statement *sta) {
+    int tmp_line = -1;
+    switch (sta->sta_type) {
+    case REM:
+        break;
+    case END:
+        ui->LOAD->setEnabled(true);
+        ui->CLEAR->setEnabled(true);
+        debug_mode = false;
+        error_handler("debug end normally!");
+        break;
+    case INPUT:
+        input_exe(sta);
+        break;
+    case INPUTS:
+        inputs_exe(sta);
+        break;
+    case PRINT:
+        print_exe(sta);
+        break;
+    case PRINTF:
+        printf_exe(sta);
+        break;
+    case GOTO:
+        tmp_line = goto_exe(sta);
+        break;
+    case LET:
+        let_exe(sta);
+        break;
+    case IF_THEN:
+        tmp_line = ifthen_exe(sta);
+        break;
+    }
+    return tmp_line;
 }

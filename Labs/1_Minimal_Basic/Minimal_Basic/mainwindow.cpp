@@ -153,6 +153,9 @@ void MainWindow::on_RUN_clicked()
 {
     // on click run button
     error_occur = false;
+    debug_mode = false;
+    ui->LOAD->setEnabled(true);
+    ui->CLEAR->setEnabled(true);
     // prepare for re-run
     ui->COMMAND_input->setText("COMMAND INPUT");
     var_to_input.clear();
@@ -190,6 +193,7 @@ void MainWindow::on_CLEAR_clicked()
     ui->RESULT_text->clear();
     ui->GRAMMAR_text->clear();
     ui->COMMAND_text->clear();
+    ui->CURRENT_VAR_text->clear();
 }
 
 void MainWindow::on_COMMAND_text_returnPressed()
@@ -206,7 +210,8 @@ void MainWindow::on_COMMAND_text_returnPressed()
         } else
             variable.setString(input_var.var, command);
         ui->COMMAND_input->setText("COMMAND INPUT");
-        execute();
+        if (!debug_mode)
+            execute();
     } else if (command == "QUIT") {
         exit(0);
     } else if (command == "HELP") {
@@ -222,6 +227,49 @@ void MainWindow::on_COMMAND_text_returnPressed()
     }
     ui->COMMAND_text->clear();
     show_code();
+}
+
+void MainWindow::on_DEBUG_STEP_clicked()
+{
+    // on debug/step clicked
+    if (!debug_mode) {  // first enter debug mode
+        ui->LOAD->setEnabled(false);
+        ui->CLEAR->setEnabled(false);
+        ui->RESULT_text->clear();
+        ui->GRAMMAR_text->clear();
+        ui->COMMAND_text->clear();
+        ui->CURRENT_VAR_text->clear();
+        variable.clear();  // clear all the variables
+        error_occur = false;
+        next_line = basic_program.firstKey();
+        debug_mode = true;
+
+        // display the first command
+        QMap<int, Statement>::iterator tmp = basic_program.find(next_line);
+        Statement *current_sta = &(tmp.value());
+        single_cmd_display(current_sta);
+        return;
+    }
+    if (!var_to_input.empty()) {
+        ui->COMMAND_input->setText("input: " + var_to_input.head().var);
+        return;
+    }
+    ui->GRAMMAR_text->clear();
+
+    // execute one command
+    QMap<int, Statement>::iterator tmp = basic_program.find(next_line);
+    Statement *current_sta = &(tmp.value());
+    int tmp_line = single_cmd_exe(current_sta);
+    show_variable();
+
+    // display next command
+    if (tmp != basic_program.end())
+        next_line = (++tmp).key();
+    if (tmp_line != -1)
+        next_line = tmp_line;
+    tmp = basic_program.find(next_line);
+    current_sta = &(tmp.value());
+    single_cmd_display(current_sta);
 }
 
 void MainWindow::highlight() {

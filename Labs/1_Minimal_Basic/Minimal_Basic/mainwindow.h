@@ -30,12 +30,15 @@ private slots:
 
     void command_handler(QString in_str);
 
+    void on_DEBUG_STEP_clicked();
+
 private:
     Ui::MainWindow *ui;
     QMap<int, Statement> basic_program;  // hold all statements by line number
     EvaluationContext variable;
     QQueue<var_in> var_to_input;
     int next_line;  // pc for the execution
+    bool debug_mode;
 
     // tool func
     void show_code();
@@ -57,6 +60,7 @@ private:
     void inputs_dis(Statement *sta);
     void ifthen_dis(Statement *sta);
     void goto_dis(Statement *sta);
+    void single_cmd_display(Statement *sta);
 
     // functions for constructing some kind of statements
     void let_handler(Statement *sta);
@@ -73,9 +77,11 @@ private:
     void inputs_exe(Statement *sta);
     int ifthen_exe(Statement *sta);
     int goto_exe(Statement *sta);
+    int single_cmd_exe(Statement *sta);
 
     // add new functions
     void highlight();
+    void show_variable();
 
     //private static MainWindow instance = new MainWindow();
     // singleton pattern or cpp static member

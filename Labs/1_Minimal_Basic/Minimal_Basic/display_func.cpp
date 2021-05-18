@@ -76,3 +76,56 @@ void MainWindow::goto_dis(Statement *sta) {
     ui->GRAMMAR_text->append(goto_pattern.cap(1) + " GOTO");
     ui->GRAMMAR_text->append("    " + goto_pattern.cap(2));
 }
+
+void MainWindow::single_cmd_display(Statement *sta) {
+    switch (sta->sta_type) {
+    case REM:
+        rem_dis(sta);
+        break;
+    case END:
+        ui->LOAD->setEnabled(true);
+        ui->CLEAR->setEnabled(true);
+        debug_mode = false;
+        error_handler("debug end normally!");
+        break;
+    case INPUT:
+        input_dis(sta);
+        break;
+    case INPUTS:
+        inputs_dis(sta);
+        break;
+    case PRINT:
+        print_handler(sta);
+        print_dis(sta);
+        break;
+    case PRINTF:
+        printf_handler(sta);
+        printf_dis(sta);
+        break;
+    case GOTO:
+        goto_dis(sta);
+        break;
+    case LET:
+        let_handler(sta);
+        let_dis(sta);
+        break;
+    case IF_THEN:
+        ifthen_handler(sta);
+        ifthen_dis(sta);
+        break;
+    }
+}
+
+void MainWindow::show_variable() {
+    ui->CURRENT_VAR_text->clear();
+    ui->CURRENT_VAR_text->append("String:");
+    QList<QString> str = variable.keys_s();
+    int len_s = str.length();
+    for (int i = 0; i < len_s; i++)
+        ui->CURRENT_VAR_text->append(str[i] + ": " + variable.getStr(str[i]));
+    ui->CURRENT_VAR_text->append("\nInteger:");
+    QList<QString> integer = variable.keys_i();
+    int len_i = integer.length();
+    for (int i = 0; i < len_i; i++)
+        ui->CURRENT_VAR_text->append(integer[i] + ": " + QString::number(variable.getValue(integer[i])));
+}

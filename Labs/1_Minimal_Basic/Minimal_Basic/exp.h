@@ -108,6 +108,8 @@ public:
     void setString(QString var, QString value);
     int getValue(QString var);
     QString getStr(QString var);
+    QList<QString> keys_i();
+    QList<QString> keys_s();
     bool isDefined(QString var);
     bool str_isDefined(QString var);
     void clear();
