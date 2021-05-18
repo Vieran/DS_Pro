@@ -145,8 +145,9 @@ void MainWindow::printf_exe(Statement *sta) {
             str_pos++;
             continue;
         } else {
-            if (var_pos > var_list.size()) {
-                throw QString("no enougth var to fill in!");
+            if (var_pos >= var_list.size()) {
+                error_handler("no enougth var to fill in!");
+                //throw QString("no enougth var to fill in!");
                 return;
             }
             var = var_list[var_pos];
