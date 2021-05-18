@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QMap>
 #include <QQueue>
+#include "ui_mainwindow.h"
 #include "exp.h"
 #include "program.h"
 
@@ -39,6 +40,7 @@ private:
     QQueue<var_in> var_to_input;
     int next_line;  // pc for the execution
     bool debug_mode;
+    QList<QTextEdit::ExtraSelection> highlight;
 
     // tool func
     void show_code();
@@ -80,7 +82,9 @@ private:
     int single_cmd_exe(Statement *sta);
 
     // add new functions
-    void highlight();
+    void add_err_line(int ln);
+    void highlight_err();
+    void highlight_oneline(int ln);
     void show_variable();
 
     //private static MainWindow instance = new MainWindow();

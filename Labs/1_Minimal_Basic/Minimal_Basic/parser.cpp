@@ -43,7 +43,7 @@ static OP tokenizer(QString str, QString &identifier, int &pos) {
             pos++;
         }
         if (tmp != quotation_mark)
-            throw ("error! not a legal string variable---quotation not map");
+            throw QString("error! not a legal string variable---quotation not map");
         else
             return STR;
     }
@@ -128,7 +128,7 @@ void construct_exp_tree(Statement *sta, QString purify_sta, int lmr) {
                 operand_stack.push(tmp);
             }
             if (top_op != "(")  // not matching
-                throw ("no matching right parenthesis");
+                throw QString("no matching right parenthesis");
             else
                 operator_stack.pop();  // pop the '('
             break;
@@ -169,7 +169,7 @@ void construct_exp_tree(Statement *sta, QString purify_sta, int lmr) {
                     else if (this_op == VALUE)
                         tmp = new IdentifierExp("-"+ value);
                     else
-                        throw ("error occurs when parsing!");
+                        throw QString("error occurs when parsing!");
                     operand_stack.push(tmp);
                 } else
                     operator_stack.push("-");
@@ -198,11 +198,11 @@ void construct_exp_tree(Statement *sta, QString purify_sta, int lmr) {
         top_op = operator_stack.top();
         operator_stack.pop();
         if (operand_stack.empty())
-            throw ("error occurs when parsing!");
+            throw QString("error occurs when parsing!");
         rhs = operand_stack.top();
         operand_stack.pop();
         if (operand_stack.empty())
-            throw ("error occurs when parsing!");
+            throw (QString("error occurs when parsing!"));
         lhs = operand_stack.top();
         operand_stack.pop();
         tmp = new CompoundExp(top_op, lhs, rhs);

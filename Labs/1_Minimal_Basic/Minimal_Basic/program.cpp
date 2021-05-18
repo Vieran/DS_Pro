@@ -24,7 +24,7 @@ Statement::Statement(QString in_str) {
     else if (sta_t == "END")
         sta_type = END;
     else
-        throw ("error when constructing!");
+        throw QString("error when constructing!");
 
     exp_tree = nullptr;
 }

@@ -57,6 +57,7 @@ void MainWindow::let_exe(Statement *sta) {
     try {
         sta->exp_tree->eval(variable);
     } catch (QString error_msg) {
+        error_occur = true;
         error_handler(error_msg);
     }
 }
@@ -67,6 +68,7 @@ void MainWindow::print_exe(Statement *sta) {
         int result = sta->exp_tree->eval(variable);
         ui->RESULT_text->append(QString::number(result));
     } catch (QString error_msg) {
+        error_occur = true;
         error_handler(error_msg);
     }
 }
@@ -82,7 +84,7 @@ static inline QString get_var(QString var, EvaluationContext &context) {
         int pos = 0;
         while (pos < len) {
             if (!var.at(pos).isNumber()) {
-                throw ("error when dealing with the printf statement!");
+                throw QString("error when dealing with the printf statement!");
                 return "";
             }
             pos++;
@@ -93,7 +95,7 @@ static inline QString get_var(QString var, EvaluationContext &context) {
     else if (context.str_isDefined(var))
         return context.getStr(var);
     else
-        throw (var + " not defined!");
+        throw QString(var + " not defined!");
 }
 
 // get the output pattern
@@ -105,7 +107,7 @@ static inline QString get_str(QString str, int &pos) {
         pos++;
 
     if (tmp != "\"" && tmp != "'") {
-        throw ("no comma found!");
+        throw QString("no comma found!");
         return "";
     }
 
@@ -144,7 +146,7 @@ void MainWindow::printf_exe(Statement *sta) {
             continue;
         } else {
             if (var_pos > var_list.size()) {
-                throw ("no enougth var to fill in!");
+                throw QString("no enougth var to fill in!");
                 return;
             }
             var = var_list[var_pos];
@@ -152,6 +154,7 @@ void MainWindow::printf_exe(Statement *sta) {
             try {
                 output += get_var(var, variable);
             } catch (QString error_msg) {
+                error_occur = true;
                 error_handler(error_msg);
                 return;
             }
@@ -191,6 +194,7 @@ int MainWindow::ifthen_exe(Statement *sta) {
         left_result = lhs->eval(variable);
         right_result = rhs->eval(variable);
     } catch (QString error_msg) {
+        error_occur = true;
         error_handler(error_msg);
     }
     QString op = sta->exp_tree->getOperator();
@@ -213,6 +217,8 @@ int MainWindow::goto_exe(Statement *sta) {
 
 int MainWindow::single_cmd_exe(Statement *sta) {
     int tmp_line = -1;
+    if (error_occur)
+        return tmp_line;
     switch (sta->sta_type) {
     case REM:
         break;

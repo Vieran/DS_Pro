@@ -49,6 +49,8 @@ void MainWindow::display_exp(QString indent, Expression *expt) {
 
 // show the grammar tree in the grammar_text box
 void MainWindow::show_grammartree() {
+    if (error_occur)
+        return;
     ui->GRAMMAR_text->clear();  // clear the text first
     QMap<int, Statement>::iterator tmp;
     tmp = basic_program.begin();
@@ -176,6 +178,7 @@ void MainWindow::on_RUN_clicked()
         it++;
     }
     show_grammartree();
+    highlight_err();
 
     if (error_occur)
         return;
@@ -189,6 +192,7 @@ void MainWindow::on_CLEAR_clicked()
    // on click clear button
     basic_program.clear();
     variable.clear();
+    highlight.clear();
     ui->CODE_text->clear();
     ui->RESULT_text->clear();
     ui->GRAMMAR_text->clear();
@@ -270,34 +274,4 @@ void MainWindow::on_DEBUG_STEP_clicked()
     tmp = basic_program.find(next_line);
     current_sta = &(tmp.value());
     single_cmd_display(current_sta);
-}
-
-void MainWindow::highlight() {
-    // get the highlight object
-    QTextEdit *code = ui->CODE_text;
-    QTextCursor cursor(code->document());
-
-    // create a list to highlight
-    QList<QTextEdit::ExtraSelection> extras;
-    // the int of qpair denotes the position of all string
-    QList<QPair<int, QColor>> highlights = {
-        {1, QColor(100, 255, 100)},
-        {100, QColor(255, 100, 100)},
-        {200, QColor(255, 100, 100)}
-    };
-
-    // configure high light
-    for(auto &line:highlights) {
-        QTextEdit::ExtraSelection h;
-        h.cursor = cursor;
-        h.cursor.setPosition(line.first);// set the cursor to the character
-        h.cursor.movePosition(QTextCursor::StartOfLine);
-        h.cursor.movePosition(QTextCursor::EndOfLine);
-        h.format.setProperty(QTextFormat::FullWidthSelection, true);
-        h.format.setBackground(line.second);
-        extras.append(h);
-    }
-
-    // apply highlight
-    code->setExtraSelections(extras);
 }

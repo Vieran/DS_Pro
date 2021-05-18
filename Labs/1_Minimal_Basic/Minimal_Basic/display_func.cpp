@@ -5,6 +5,7 @@
 #include <QString>
 #include <QRegExp>
 #include <QtDebug>
+#include <QTextBlock>
 
 void MainWindow::rem_dis(Statement *sta) {
     QRegExp rem_pattern("\\s*(\\d+)\\s+REM\\s+(.*)");
@@ -78,6 +79,11 @@ void MainWindow::goto_dis(Statement *sta) {
 }
 
 void MainWindow::single_cmd_display(Statement *sta) {
+    if (error_occur)
+        return;
+    QRegExp get_ln("\\s*(\\d+)(.*)");
+    get_ln.indexIn(sta->statement);
+    highlight_oneline(get_ln.cap(1).toUInt());
     switch (sta->sta_type) {
     case REM:
         rem_dis(sta);
@@ -128,4 +134,49 @@ void MainWindow::show_variable() {
     int len_i = integer.length();
     for (int i = 0; i < len_i; i++)
         ui->CURRENT_VAR_text->append(integer[i] + ": " + QString::number(variable.getValue(integer[i])));
+}
+
+// append a new error line to the "highlight"
+void MainWindow::add_err_line(int ln) {
+    // get the highlight object
+    QTextEdit *code = ui->CODE_text;
+    int line_number = 0;
+    QMap<int, Statement>::iterator tmp = basic_program.begin();
+    while (tmp.key() != ln && tmp != basic_program.end()) {
+        tmp++;
+        line_number++;
+    }
+    QTextCursor cursor(code->document()->findBlockByLineNumber(line_number));
+    QTextEdit::ExtraSelection h;
+    h.cursor = cursor;
+    code->setTextCursor(cursor);
+    h.format.setProperty(QTextFormat::FullWidthSelection, true);
+    h.format.setBackground(QColor(255, 100, 100));
+    highlight.append(h);
+}
+
+void MainWindow::highlight_err() {
+    // apply highlight
+    QTextEdit *code = ui->CODE_text;
+    code->setExtraSelections(highlight);
+}
+
+// highlight one line for debug mode
+void MainWindow::highlight_oneline(int ln) {
+    int line_number = 0;
+    QMap<int, Statement>::iterator tmp = basic_program.begin();
+    while (tmp.key() != ln && tmp != basic_program.end()) {
+        tmp++;
+        line_number++;
+    }
+    QTextEdit *code = ui->CODE_text;
+    QTextCursor cursor(code->document()->findBlockByLineNumber(line_number));
+    QTextEdit::ExtraSelection h;
+    h.cursor = cursor;
+    code->setTextCursor(cursor);
+    h.format.setProperty(QTextFormat::FullWidthSelection, true);
+    h.format.setBackground(QColor(100, 255, 100));
+    QList<QTextEdit::ExtraSelection> list;
+    list.append(h);
+    code->setExtraSelections(list);
 }
