@@ -24,11 +24,13 @@ class SSTable {
     uint32_t level;      // level of this sstable
     uint32_t position;   // index of sstable in the level
 
+    void set_bf(int64_t key);       // set up a bloom filter
+
    public:
     SSTable();
     SSTable(MemTable *mt);
     ~SSTable();
-    std::string exist(int64_t key);
+    bool exist(int64_t key);
     std::string get(int64_t key);
     uint64_t get_timestamp();
     void write_file();

@@ -24,6 +24,30 @@ MemTable::~MemTable() {
     }
 }
 
+// clear all key value
+void MemTable::clear() {
+    NODE *current_level = head;
+    NODE *next_level;
+    while (current_level) {
+        next_level = current_level->down;
+        NODE *tmp;
+        while (current_level->right != nullptr) {
+            tmp = current_level->right;
+            current_level->right = tmp->right;
+            free(tmp);
+        }
+        free(current_level);
+        current_level = next_level;
+    }
+
+    head = new NODE();
+    memt_size = 0;
+}
+
+// change a memtable into a sstable
+void MemTable::to_SSTable() {
+}
+
 // return the num of nodes in the memtable
 size_t MemTable::size() { return memt_size; }
 
@@ -43,8 +67,10 @@ std::string* MemTable::get(const int64_t &key) {
 }
 
 void MemTable::put(const int64_t &key, const std::string &val) {
-    size_t node_size = sizeof(int64_t) + val.capacity();
+    size_t node_size = sizeof(int64_t) + sizeof(uint32_t) + val.length();  // for char, the length is the byte it takes; offset is uint32_t
     /* TODO: whether to put into sstable */
+    if (memt_size + node_size > MAXSIZE)
+        to_SSTable();
 
     std::vector<NODE *> pathlist;  // record the search path
     NODE *p = head;
@@ -63,12 +89,12 @@ void MemTable::put(const int64_t &key, const std::string &val) {
 
     // update key-value pair
     if (exist) {
-        memt_size -= sizeof(p->val);
+        memt_size -= (p->val).length();  // only the length of string would change
         while (p) {
             p->val = val;
             p = p->down;
         }
-        memt_size += sizeof(val);
+        memt_size += val.length();
         return;
     }
 
@@ -111,7 +137,7 @@ bool MemTable::remove(const int64_t &key) {
     // delete and link
     NODE *tmp;
     NODE *preNode;
-    size_t node_size = sizeof(int64_t) + pathlist.back()->val.capacity();
+    size_t node_size = sizeof(int64_t) + sizeof(uint32_t) + pathlist.back()->val.length();
     while (!pathlist.empty()) {
         preNode = pathlist.back();
         if (preNode == head && head->right->right == nullptr)  // delete at top level
