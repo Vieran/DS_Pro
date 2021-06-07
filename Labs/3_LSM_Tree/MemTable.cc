@@ -6,6 +6,7 @@
 MemTable::MemTable() {
     head = new NODE();
     memt_size = 0;
+    node_num = 0;
 }
 
 MemTable::~MemTable() {
@@ -42,35 +43,31 @@ void MemTable::clear() {
 
     head = new NODE();
     memt_size = 0;
-}
-
-// change a memtable into a sstable
-void MemTable::to_SSTable() {
+    node_num = 0;
 }
 
 // return the num of nodes in the memtable
-size_t MemTable::size() { return memt_size; }
+size_t MemTable::size() { return node_num; }
 
-std::string* MemTable::get(const int64_t &key) {
-    if (memt_size == 0)
-        return nullptr;
+std::string MemTable::get(const uint64_t &key) {
+    if (node_num == 0)
+        return "";
     NODE *p = head;
     while (p) {
         while (p->right && p->right->key <= key) {
             if (p->right->key == key)
-                return &(p->right->val);
+                return p->right->val;
             p = p->right;
         }
         p = p->down;
     }
-    return nullptr;
+    return "";
 }
 
-void MemTable::put(const int64_t &key, const std::string &val) {
-    size_t node_size = sizeof(int64_t) + sizeof(uint32_t) + val.length();  // for char, the length is the byte it takes; offset is uint32_t
-    /* TODO: whether to put into sstable */
-    if (memt_size + node_size > MAXSIZE)
-        to_SSTable();
+bool MemTable::put(const uint64_t &key, const std::string &val) {
+    size_t node_size = sizeof(uint64_t) + sizeof(uint32_t) + val.length();  // for char, the length is the byte it takes; offset is uint32_t
+    if (memt_size + node_size > MAXSIZE)  // need to transfer it into a sstable
+        return false;
 
     std::vector<NODE *> pathlist;  // record the search path
     NODE *p = head;
@@ -89,18 +86,19 @@ void MemTable::put(const int64_t &key, const std::string &val) {
 
     // update key-value pair
     if (exist) {
-        memt_size -= (p->val).length();  // only the length of string would change
+        size_t tmp_size = memt_size - (p->val).length() + val.length();
+        if (tmp_size > MAXSIZE)
+            return false;
         while (p) {
             p->val = val;
             p = p->down;
         }
-        memt_size += val.length();
-        return;
+        memt_size = tmp_size;
+        return true;
     }
 
     bool insertUp = true;
     NODE *downNode = nullptr;
-    size_t new_node_size = 0;
     while (insertUp && pathlist.size() > 0) {
         NODE *insert = pathlist.back();
         pathlist.pop_back();
@@ -115,10 +113,13 @@ void MemTable::put(const int64_t &key, const std::string &val) {
         head->down = oldHead;
     }
     memt_size += node_size;
+    node_num++;
+
+    return true;
 }
 
-bool MemTable::remove(const int64_t &key) {
-    if (memt_size == 0)
+bool MemTable::remove(const uint64_t &key) {
+    if (node_num == 0)
         return false;
     
     std::vector<NODE *> pathlist;  // record the search path
@@ -137,7 +138,7 @@ bool MemTable::remove(const int64_t &key) {
     // delete and link
     NODE *tmp;
     NODE *preNode;
-    size_t node_size = sizeof(int64_t) + sizeof(uint32_t) + pathlist.back()->val.length();
+    size_t node_size = sizeof(uint64_t) + sizeof(uint32_t) + pathlist.back()->val.length();
     while (!pathlist.empty()) {
         preNode = pathlist.back();
         if (preNode == head && head->right->right == nullptr)  // delete at top level
@@ -148,5 +149,15 @@ bool MemTable::remove(const int64_t &key) {
         pathlist.pop_back();
     }
     memt_size -= node_size;
+    node_num--;
     return true;
+}
+
+// return all the key-value list
+NODE* MemTable::key_value() {
+    NODE *tmp = head;
+    // find the bottom level, which contains all the elements in the list
+    while (tmp->down != nullptr)
+        tmp = tmp->down;
+    return tmp;
 }

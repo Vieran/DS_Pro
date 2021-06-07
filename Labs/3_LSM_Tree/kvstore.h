@@ -8,7 +8,7 @@ class KVStore : public KVStoreAPI {
 	// You can add your implementation here
 private:
 	MemTable memt;
-	SSTable_handler *sst_h;
+	SSTable_handler sst_h;
 
 public:
 	KVStore(const std::string &dir);

@@ -3,32 +3,33 @@
 
 #include <cstdint>
 #include <string>
-#define MAXSIZE 2086880
+//#define MAXSIZE 2086880
+#define MAXSIZE 60
 
 struct NODE {
     NODE *right, *down;
-    int64_t key;
+    uint64_t key;
     std::string val;
-    NODE(NODE *right, NODE *down, int64_t key, std::string val)
+    NODE(NODE *right, NODE *down, uint64_t key, std::string val)
         : right(right), down(down), key(key), val(val) {}
     NODE(): right(nullptr), down(nullptr) {}
 };
 
 class MemTable {
-   private:
+  private:
     NODE *head;
     size_t memt_size;
+    uint64_t node_num;
 
-    void to_SSTable();
-
-   public:
+  public:
     MemTable();
     ~MemTable();
     size_t size();
-    std::string* get(const int64_t &key);
-    void put(const int64_t &key, const std::string &val);
-    bool remove(const int64_t &key);
+    std::string get(const uint64_t &key);
+    bool put(const uint64_t &key, const std::string &val);
+    bool remove(const uint64_t &key);
     void clear();
+    NODE* key_value();
 };
 
 // step by step

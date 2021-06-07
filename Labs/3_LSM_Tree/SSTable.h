@@ -7,31 +7,31 @@
 struct HEADER {
     uint64_t time_stamp;
     uint64_t pair_num;
-    int64_t max_key;
-    int64_t min_key;
+    uint64_t min_key;
+    uint64_t max_key;
 };
 
 struct INDEX {
     uint64_t key;
-    uint32_t offset;
+    uint32_t offset;  // refer to the start index of the key-value
 };
 
 class SSTable {
-   private:
+  private:
     HEADER header;       // header
-    bool *bloom_filter;  // bloom filter
+    bool bloom_filter[10240];  // bloom filter
     INDEX *index;        // index
-    uint32_t level;      // level of this sstable
-    uint32_t position;   // index of sstable in the level
+    std::string filename;
+    uint32_t total_size;
 
-    void set_bf(int64_t key);       // set up a bloom filter
+    void set_bf(uint64_t key);       // set up a bloom filter
 
-   public:
+  public:
     SSTable();
-    SSTable(MemTable *mt);
+    SSTable(MemTable &memt, uint64_t &t_stamp, uint64_t level = 0);
     ~SSTable();
-    bool exist(int64_t key);
-    std::string get(int64_t key);
+    bool exist(uint64_t key);
+    std::string get(uint64_t key);
     uint64_t get_timestamp();
-    void write_file();
+    void clear();
 };

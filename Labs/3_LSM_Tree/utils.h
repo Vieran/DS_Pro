@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include <vector>
 #include <sys/types.h>
+#include <cstring>  // this is new added
 
 #ifdef _WIN32
 #include <direct.h>
