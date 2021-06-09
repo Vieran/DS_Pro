@@ -161,3 +161,8 @@ NODE* MemTable::key_value() {
         tmp = tmp->down;
     return tmp;
 }
+
+// if the memory table is empty
+bool MemTable::empty() {
+    return node_num == 0 ? true : false;
+}

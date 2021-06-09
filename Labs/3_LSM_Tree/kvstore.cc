@@ -3,10 +3,12 @@
 
 KVStore::KVStore(const std::string &dir): KVStoreAPI(dir) {
     // read from the dir
-    sst_h.read_file(dir);
+    sst_h.set_dirname(dir);
 }
 
 KVStore::~KVStore() {
+    sst_h.to_sst(memt);
+    memt.clear();
 }
 
 /**

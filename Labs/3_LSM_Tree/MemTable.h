@@ -3,8 +3,7 @@
 
 #include <cstdint>
 #include <string>
-//#define MAXSIZE 2086880
-#define MAXSIZE 60
+#define MAXSIZE 2086880
 
 struct NODE {
     NODE *right, *down;
@@ -30,6 +29,7 @@ class MemTable {
     bool remove(const uint64_t &key);
     void clear();
     NODE* key_value();
+    bool empty();
 };
 
 // step by step

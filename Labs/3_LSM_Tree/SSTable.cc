@@ -1,21 +1,68 @@
 /* implementation of the SSTable */
 
 #include "SSTable.h"
+#include "SSTable_handler.h"
 #include <fstream>
 #include <iostream>
 #include "MurmurHash3.h"
 #include "utils.h"
 
-SSTable::SSTable() {}
+// construct a sstable from a given node list
+SSTable::SSTable(std::vector<key_value> &nodes, const uint64_t t_stamp, uint64_t &filenum, const std::string &dirname, const uint32_t level) {
+    // set filename
+    filepath = dirname + "/level-" +std::to_string(level) + "/" + std::to_string(filenum++) + ".sst";
+    // set header
+    header.time_stamp = t_stamp;
+    header.pair_num = nodes.size();
+    header.min_key = (*nodes.begin()).key;
+    header.max_key = (*(nodes.end()-1)).key;
+    // set index
+    uint64_t i = 0;
+    uint32_t offset = sizeof(header) + sizeof(bloom_filter) + (sizeof(uint64_t) + sizeof(uint32_t)) * header.pair_num;
+    index = new INDEX[header.pair_num];
+    for (std::vector<key_value>::iterator it = nodes.begin(); it != nodes.end(); it++) {
+        index[i].key = (*it).key;
+        index[i].offset = offset;
+        i++;
+        offset += (*it).val.length();
+        set_bf((*it).key);
+    }
+    // set total size of the data
+    total_size = offset;
+
+    // write to file
+    // 1. create a dir
+    std::string path = "data/level-" + std::to_string(level);
+    if (!utils::dirExists(path))
+        utils::mkdir((char*)(path.data()));
+    // 2. open and write everything except data part
+    std::ofstream file(filepath, std::ios::binary);
+    if (!file.is_open()) {
+        std::cerr << "write: can not open " << filepath << std::endl;
+        exit(-1);
+    }
+    file.write(reinterpret_cast<char*>(&header), sizeof(header));
+    file.write(reinterpret_cast<char*>(bloom_filter), sizeof(bloom_filter));
+    for (i = 0; i < header.pair_num; i++)
+        //file << index->key << index->offset;
+        file.write(reinterpret_cast<char*>(&index[i]), sizeof(uint64_t) + sizeof(uint32_t));
+    // 3. write data part
+    for (std::vector<key_value>::iterator it = nodes.begin(); it != nodes.end(); it++)
+        file.write((char*)((*it).val.data()), sizeof(char) * (*it).val.length());
+    file.close();
+}
 
 // construct a sstable from a given memtable
 // default parameter either on declare or on definition, can not both
-SSTable::SSTable(MemTable &memt, uint64_t &t_stamp, uint64_t level) {
-    filename = std::to_string(t_stamp) + ".sst";
+SSTable::SSTable(MemTable &memt, uint64_t &t_stamp, uint64_t &filenum, const std::string &dirname, uint64_t level) {
+    // set filename
+    filepath = dirname + "/level-" + std::to_string(level) + "/" + std::to_string(filenum++) + ".sst";
+    // set header
     NODE *key_val = memt.key_value()->right;
     header.time_stamp = t_stamp++;
     header.pair_num = memt.size();
     header.min_key = key_val->key;
+    // set index
     NODE *tmp = key_val;
     uint64_t i = 0;
     uint32_t offset = sizeof(header) + sizeof(bloom_filter) + (sizeof(uint64_t) + sizeof(uint32_t)) * header.pair_num;
@@ -36,8 +83,7 @@ SSTable::SSTable(MemTable &memt, uint64_t &t_stamp, uint64_t level) {
     std::string path = "data/level-" + std::to_string(level);
     if(!utils::dirExists(path))
         utils::mkdir((char*)(path.data()));
-    // 2. open and write the everything except for data part
-    std::string filepath = path + "/" + filename;
+    // 2. open and write everything except for data part
     std::ofstream file(filepath, std::ios::binary);
     if (!file.is_open()) {
         std::cerr << "write: can not open " << filepath << std::endl;
@@ -59,7 +105,34 @@ SSTable::SSTable(MemTable &memt, uint64_t &t_stamp, uint64_t level) {
     file.close();
 }
 
-SSTable::~SSTable() {}
+// construct a sstable form an exist file
+SSTable::SSTable(std::string fp) {
+    filepath = fp;
+    std::ifstream file(filepath, std::ios::binary);
+    if (!file.is_open()) {
+        std::cerr << "read: can not open " << filepath << std::endl;
+        exit(-1);
+    }
+
+    // set header
+    file.read(reinterpret_cast<char*>(&header), sizeof(header));
+    // set bloomfilter
+    file.read(reinterpret_cast<char*>(bloom_filter), sizeof(bloom_filter));
+    // set index
+    index = new INDEX[header.pair_num];
+    uint64_t i;
+    for (i = 0; i < header.pair_num; i++)
+        file.read(reinterpret_cast<char*>(&index[i]), sizeof(uint64_t) + sizeof(uint32_t));
+    // set total size
+    file.seekg(0, std::ios::end);
+    total_size = file.tellg();
+    file.close();
+}
+
+SSTable::~SSTable() {
+    // delete index
+    delete [] index;
+}
 
 // setup a bloom filter for a new added key
 void SSTable::set_bf(uint64_t key) {
@@ -96,23 +169,24 @@ std::string SSTable::get(uint64_t key) {
     uint32_t offset;
     bool flag = false;
     while (left <= right) {
-        middle = left + ((right - left) >> 1);
-        if (index[middle].key > key)
-            right = middle - 1;
-        else if (index[middle].key < key)
-            left = middle + 1;
-        else {
+        middle = left + (right - left) / 2;
+        if (index[middle].key == key) {
             offset = index[middle].offset;
             flag = true;
             break;
         }
+        if (index[middle].key > key) {
+            if (middle <= 0)
+                break;
+            right = middle - 1;
+        } else
+            left = middle + 1;
     }
     if (!flag)  // key-value not found
         return "";
     
     // open file and read the value
     std::string value;
-    std::string filepath = "data/level-0/" + filename;
     std::ifstream file(filepath, std::ios::binary);
     if (!file.is_open()) {
         std::cerr << "read: can not open " << filepath << std::endl;
@@ -135,7 +209,32 @@ std::string SSTable::get(uint64_t key) {
     return value;
 }
 
-// retrun the time stamp of given sstable
+// retrun the time stamp of sstable
 uint64_t SSTable::get_timestamp() {
     return header.time_stamp;
+}
+
+// return the min key of sstable
+uint64_t SSTable::get_minkey() {
+    return header.min_key;
+}
+
+// return the max key of sstable
+uint64_t SSTable::get_maxkey() {
+    return header.max_key;
+}
+
+// return the pair num of keys of sstable
+uint64_t SSTable::get_pairnum() {
+    return header.pair_num;
+}
+
+// return the i^th key in the sstable
+uint64_t SSTable::get_index_key(uint64_t i) {
+    return index[i].key;
+}
+
+// delete the file
+void SSTable::rmfile() {
+    utils::rmfile((char*)(filepath.data()));
 }
