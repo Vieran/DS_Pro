@@ -11,7 +11,7 @@
 #include <regex>
 
 SSTable_handler::SSTable_handler() {
-    t_stamp = 0;
+    t_stamp = 1;
     filenum = 0;
     std::vector<SSTable*> first_ele;
     sst_handler_list.push_back(first_ele);
@@ -194,7 +194,7 @@ void SSTable_handler::compaction(uint32_t level) {
             }
 
         // generate new sstables and write into file
-        compact_kernel(nodeq, next_level, maxt, next_level == sst_handler_list.size() - 1);
+        compact_kernel(nodeq, next_level, maxt, next_level == (sst_handler_list.size() - 1));
 
         // erase(be careful that the size of vector change when you do the erase, so intro "k")
         std::sort(index_list.begin(), index_list.end());

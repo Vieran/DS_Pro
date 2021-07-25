@@ -155,9 +155,19 @@ bool SSTable::exist(uint64_t key) {
         return false;
     
     // search if the key really exist
-    for (uint64_t i = 0; i < header.pair_num; i++)
-        if (index[i].key == key)
+    uint64_t left = 0, right = header.pair_num - 1, middle = 0;
+    while (left <= right) {
+        middle = left + (right - left) / 2;
+        if (index[middle].key == key) {
             return true;
+        }
+        if (index[middle].key > key) {
+            if (middle <= 0)
+                break;
+            right = middle - 1;
+        } else
+            left = middle + 1;
+    }
     return false;
 }
 
